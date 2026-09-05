@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wanderlust</title>
+  <script type="importmap">
+  { "imports": {
+      "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs"
+  } }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@500&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --raw-color-white: #ffffff;
+      --raw-color-neutral-100: #ededed;
+      --raw-color-neutral-900: #171717;
+      --raw-color-neutral-950: #0a0a0a;
+      --raw-color-black: #000000;
+      
+      /* Dark Luxury specific variables */
+      --raw-color-cream-100: #ffedc3;
+      --raw-color-cream-100-alpha-40: rgba(255, 237, 195, 0.4);
+      --raw-color-cream-100-alpha-50: rgba(255, 237, 195, 0.5);
+      --raw-color-cream-100-alpha-80: rgba(255, 237, 195, 0.8);
+      
+      --raw-color-black-alpha-50: rgba(0, 0, 0, 0.5);
+      --raw-color-black-alpha-40: rgba(0, 0, 0, 0.4);
+      --raw-color-black-alpha-15: rgba(0, 0, 0, 0.15);
+      --raw-color-signal-red: #ff3b30;
+      --raw-color-ink-950: #0c0c0c;
+      --raw-color-ink-950-alpha-10: rgba(12, 12, 12, 0.1);
+
+      --raw-duration-fast: 150ms;
+      --raw-duration-normal: 250ms;
+      --raw-radius-xs: 0.25rem;
+
+      --raw-text-display: 5.625rem;
+      --raw-text-wordmark: 1.5rem;
+      --raw-text-body: 0.875rem;
+      --raw-text-caption: 0.75rem;
+
+      --raw-leading-title: 4.5rem;
+      --raw-leading-wordmark: 1.35rem;
+      --raw-leading-body: 0.7rem;
+      --raw-leading-caption: 0.6rem;
+
+      --raw-spacing-page: 1.5rem;
+      --raw-spacing-md: 0.75rem;
+      --raw-spacing-sm: 0.625rem;
+      --raw-spacing-xs: 0.375rem;
+
+      /* Map roles to Dark Luxury values */
+      --background: var(--raw-color-black);
+      --foreground: var(--raw-color-cream-100);
+      --surface-cinema: var(--raw-color-black);
+      --surface-glass: var(--raw-color-ink-950-alpha-10);
+      --surface-gallery: var(--raw-color-ink-950);
+      
+      --foreground-accent: var(--raw-color-cream-100);
+      --foreground-accent-muted: var(--raw-color-cream-100-alpha-40);
+      --foreground-accent-soft: var(--raw-color-cream-100-alpha-50);
+      --foreground-accent-strong: var(--raw-color-cream-100-alpha-80);
+      
+      /* Make foreground ink also cream since the whole page is dark */
+      --foreground-ink: var(--raw-color-cream-100);
+      --foreground-ink-muted: var(--raw-color-cream-100-alpha-40);
+      
+      --foreground-signal: var(--raw-color-signal-red);
+      --scrim-page: var(--raw-color-black-alpha-50);
+      --scrim-media: var(--raw-color-black-alpha-40);
+      --scrim-scene: var(--raw-color-black-alpha-40);
+      --scrim-cta: var(--raw-color-black-alpha-15);
+      --scrim-panel: var(--raw-color-black-alpha-50);
+      --rounding-media: var(--raw-radius-xs);
+
+      --typeface-display: "Instrument Serif", serif;
+      --typeface-ui: "Inter Tight", sans-serif;
+      --typeface-hand: "Caveat", cursive;
+
+      --ease-entrance: cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    html { font-size: 16px; }
+    @media (max-width: 1440px) { html { font-size: 1.111111vw; } }
+    @media (max-width: 1024px) { html { font-size: 1.5625vw; } }
+    @media (max-width: 640px)  { html { font-size: 4.444444vw; } }
+
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      font-family: var(--typeface-ui);
+      font-size: var(--raw-text-body);
+      line-height: var(--raw-leading-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .text-trim { text-box-trim: trim-both; text-box-edge: cap alphabetic; }
+    .min-h-viewport { min-height: 100vh; min-height: 100dvh; }
+
+    .italic { font-style: italic; }
+    .uppercase { text-transform: uppercase; }
+
+    /* General Layout */
+    .display { font-family: var(--typeface-display); font-size: var(--raw-text-display); line-height: var(--raw-leading-title); }
+    .wordmark { font-family: var(--typeface-display); font-size: var(--raw-text-wordmark); line-height: var(--raw-leading-wordmark); }
+    .caption { font-size: var(--raw-text-caption); line-height: var(--raw-leading-caption); letter-spacing: 0.05em; }
+
+    /* Preloader */
+    #preloader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--surface-cinema);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--foreground-accent);
+      transition: transform 0.78s var(--ease-entrance);
+    }
+    #preloader.lift { transform: translateY(-100%); }
+
+    /* Hero */
+    #hero {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      background: var(--surface-cinema);
+      color: var(--foreground-accent);
+      overflow: hidden;
+    }
+    #hero-video, #hero-still {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.5);
+    }
+    #hero-still { opacity: 0; pointer-events: none; }
+    #hero-veil {
+      position: absolute; inset: 0; background: var(--scrim-page); pointer-events: none; opacity: 0;
+    }
+    #hero-grain {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.15;
+      background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+    }
+
+    /* Fixed chrome */
+    .chrome { position: fixed; z-index: 100; pointer-events: none; }
+    #wordmark-top { left: 1.5rem; top: 1.5rem; }
+    #nav-right { left: 62.125rem; top: 1.5rem; width: 5.75rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    #explore-btn { right: 1.5rem; top: 1.5rem; width: 11.3125rem; text-align: right; }
+    #dest-list { right: 1.5rem; bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.3rem; text-align: right; }
+    #dest-list .caption { color: var(--foreground-accent-muted); }
+    #view-modes { left: 1.5rem; bottom: 1.5rem; display: flex; gap: 1rem; }
+    
+    .hero-group { opacity: 0; transform: translateY(1.25rem); pointer-events: none; will-change: transform, opacity; }
+    
+    /* Lens */
+    #lens-container {
+      position: absolute;
+      left: 29.375rem; top: calc(50% - 9.84375rem);
+      width: 31.25rem; height: 19.6875rem;
+      border-radius: var(--rounding-media);
+      overflow: hidden;
+      z-index: 10;
+      transform-origin: center;
+      transform: scale(0.62);
+      box-shadow: 0 0 100px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,237,195,0.1);
+    }
+    #lens-inner {
+      position: absolute;
+      left: -29.375rem; top: calc(-50vh + 9.84375rem);
+      width: 100vw; height: 100vh;
+      transform-origin: 45rem 50vh;
+    }
+    #hero-video-lens {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(1.18) saturate(1.25);
+    }
+    #recording-light {
+      position: absolute; top: 1rem; right: 1rem; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--foreground-signal);
+      box-shadow: 0 0 8px var(--foreground-signal);
+    }
+
+    #titles { position: absolute; inset: 0; z-index: 8; }
+    #title-start { position: absolute; right: calc(100vw - 62.125rem); top: calc(50% - 4.3125rem); width: 14.875rem; text-align: right; }
+    #title-end { position: absolute; left: 62.125rem; top: calc(50% - 4.3125rem); width: 21.258625rem; }
+
+    #captions-wrapper { position: absolute; inset: 0; z-index: 15; }
+    #caption-follow { position: absolute; inset: 0; will-change: transform; }
+    #caption-top { position: absolute; left: 29.375rem; width: 31.25rem; top: calc(50% - 11.15625rem); text-align: center; color: var(--foreground-accent-muted); }
+    #caption-bottom { position: absolute; left: 29.375rem; width: 31.25rem; top: calc(50% + 10.59375rem); text-align: center; color: var(--foreground-accent-muted); }
+
+    #thumbnails { position: absolute; inset: 0; z-index: 5; }
+    .thumb { position: absolute; left: 37.9375rem; width: 14.1875rem; object-fit: cover; opacity: 0.6; filter: brightness(0.4); border-radius: 2px; }
+    .thumb.top { top: 0; height: 8.25rem; transform: translateY(-50%); }
+    .thumb.bottom { bottom: 0; height: 8.3125rem; transform: translateY(50%); }
+
+    @media (max-width: 1024px) {
+      #nav-right, #explore-btn { display: none; }
+      #wordmark-top { left: 1.5rem; top: 1.5rem; }
+      #lens-container {
+        left: 50%; top: 50%;
+        transform: translate(-50%, calc(-50% + 0.315rem));
+        width: min(calc(100vw - 3rem), 31.25rem, calc((100vh - 36rem) / 0.63));
+      }
+      #title-start, #title-end { position: relative; right: auto; left: auto; top: auto; width: 100%; text-align: center; }
+      #titles { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      #dest-list { left: 1.5rem; bottom: 1.5rem; text-align: left; }
+    }
+
+    /* Block 2 Destinations */
+    #block2 { background: var(--surface-gallery); position: relative; container-type: inline-size; width: 100vw; height: calc(100vw * 687 / 1440); min-height: 600px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    #b2-header { position: absolute; top: 4rem; width: 100%; text-align: center; color: var(--foreground-accent); z-index: 30; pointer-events: none; }
+    .polaroid-pos { position: absolute; transform: translate(-50%, -50%); transform-style: preserve-3d; will-change: transform; pointer-events: none; }
+    .polaroid-inner { will-change: transform, filter; pointer-events: auto; cursor: pointer; filter: brightness(0.45); transition: filter 0.25s ease, transform 0.25s ease; }
+    .polaroid-img { width: 100%; display: block; }
+    
+    #b2-list-left { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.5rem; color: var(--foreground-accent-muted); z-index: 30; pointer-events: auto; cursor: pointer; }
+    #b2-list-right { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.5rem; color: var(--foreground-accent-muted); z-index: 30; pointer-events: auto; cursor: pointer; text-align: right; }
+    .b2-list-item:hover { color: var(--foreground-accent); }
+    .sticker { position: absolute; transform: translate(-50%, -50%); z-index: 20; filter: brightness(0.62); }
+
+    @media (max-width: 1024px) {
+      #block2 { height: auto; min-height: 100vh; flex-direction: column; padding: 4rem 0; container-type: normal; overflow: hidden; }
+      #b2-header { position: relative; top: 0; margin-bottom: 2rem; }
+      #b2-scene-container { position: relative; width: 100%; height: 60vh; }
+      #b2-list-left, #b2-list-right { display: none; }
+    }
+
+    /* Block 3 Philosophy */
+    #block3 { position: relative; width: 100vw; height: 100vh; overflow: hidden; color: var(--foreground-accent); }
+    #b3-pin-container { position: sticky; top: 0; width: 100%; height: 100vh; overflow: hidden; }
+    #b3-bg-img { position: absolute; inset: -50% 0; width: 100%; height: 200%; object-fit: cover; z-index: 1; will-change: transform; }
+    #b3-scrim { position: absolute; inset: 0; background: var(--scrim-scene); z-index: 2; }
+    #b3-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    
+    #b3-headline { text-align: center; max-width: 60rem; z-index: 10; }
+    .b3-word { display: inline-block; opacity: 0; transform: translateY(0.28em); will-change: opacity, transform; }
+    
+    #b3-left-para { position: absolute; left: 1.5rem; top: calc(50% - 2rem); max-width: 15rem; color: var(--foreground-accent-soft); opacity: 0; }
+    #b3-right-para { position: absolute; right: 1.5rem; top: calc(50% - 2rem); max-width: 15rem; text-align: right; color: var(--foreground-accent-soft); opacity: 0; }
+    #b3-collage { position: absolute; left: calc(50% + 20rem); top: calc(50% - 15rem); width: 22rem; transform: rotate(7deg); opacity: 0; pointer-events: none; }
+    #b3-signoff { position: absolute; bottom: 3rem; text-align: center; font-family: var(--typeface-hand); font-size: 2rem; opacity: 0; }
+
+    @media (max-width: 1024px) {
+      #b3-left-para, #b3-right-para { position: relative; left: auto; right: auto; top: auto; text-align: center; margin: 1rem 0; }
+      #b3-collage { display: none; }
+      #b3-signoff { bottom: 1.5rem; }
+    }
+
+    /* Block 4 How We Travel */
+    #block4 { background: var(--surface-cinema); color: var(--foreground-accent); width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+    #b4-header { padding: 4rem 1.5rem; text-align: center; }
+    #b4-panels { display: flex; width: 100vw; height: 75vh; }
+    .b4-panel { flex: 1; position: relative; overflow: hidden; cursor: pointer; border-left: 1px solid var(--scrim-scene); transition: flex 0.6s cubic-bezier(0.2, 0, 0, 1); }
+    .b4-panel-img-wrap { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .b4-panel-img { position: absolute; height: 100%; width: calc(100% + 101px); left: -50.5px; object-fit: cover; }
+    .b4-panel-scrim { position: absolute; inset: 0; background: linear-gradient(to top, var(--scrim-panel), transparent); pointer-events: none; opacity: 1; transition: opacity 0.6s; }
+    .b4-panel-content { position: absolute; bottom: 2rem; left: 1.5rem; right: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; opacity: 0; transform: translateY(1rem); transition: all 0.6s; color: var(--foreground-accent-strong); }
+    .b4-panel.active { flex: 2.5; }
+    .b4-panel.active .b4-panel-content { opacity: 1; transform: translateY(0); }
+    .b4-panel:not(.active) .b4-panel-scrim { opacity: 0.7; }
+    .b4-panel:not(.active) { filter: brightness(0.6); }
+    
+    @media (max-width: 1024px) {
+      #block4 { background: #0c0c0c; margin-top: -100dvh; position: relative; z-index: 10; }
+      #b4-header { padding-top: 104px; padding-bottom: 48px; }
+      #b4-panels { flex-direction: column; height: auto; }
+      .b4-panel { flex: none !important; height: 62dvh; min-height: 26rem; filter: none !important; margin-bottom: 1px; }
+      .b4-panel-img { top: -10%; height: 120%; width: 100%; left: 0; transform: translateY(0); will-change: transform; }
+      .b4-panel-content { inset: 0; bottom: auto; left: 1.5rem; right: 1.5rem; height: 100%; align-items: center; justify-content: center; text-align: center; gap: 2rem; opacity: 1; transform: none; z-index: 2; }
+    }
+    @media (max-width: 640px) {
+      #b4-header { padding-top: 88px; }
+      .b4-panel { height: 56dvh; min-height: 22rem; }
+      .b4-panel-content { gap: 1.5rem; }
+    }
+
+    /* Block 5 Plan a Journey */
+    #block5 { position: relative; width: 100vw; height: 1077px; overflow: hidden; background: var(--surface-cinema); color: var(--foreground-accent); }
+    .b5-layer { position: absolute; inset: -50px; width: calc(100% + 100px); height: calc(100% + 100px); object-fit: cover; will-change: transform; pointer-events: none; }
+    #b5-bg { z-index: 1; }
+    #b5-far { z-index: 2; }
+    #b5-steam { z-index: 3; opacity: 0.85; filter: url(#b5-steam-wisps); }
+    #b5-fg { z-index: 4; }
+    #b5-scrim { position: absolute; inset: 0; background: var(--scrim-cta); z-index: 5; pointer-events: none; }
+
+    #b5-content { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    
+    #b5-pin-container { position: relative; width: 342px; margin-bottom: 3rem; transform-origin: 51% 10%; will-change: transform; perspective: 1000px; }
+    #b5-pin-img { width: 100%; display: block; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
+    #b5-note-text { position: absolute; top: 40%; left: 10%; right: 10%; transform: translateY(-50%); font-family: var(--typeface-hand); font-size: 1.5rem; color: var(--raw-color-black); text-transform: uppercase; line-height: 1.2; }
+    .b5-line-mask { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; width: 0%; will-change: width; }
+    #b5-aside { position: absolute; bottom: 15%; right: 10%; font-family: var(--typeface-hand); font-size: 1.2rem; transform: rotate(-5deg); opacity: 0; }
+
+    #b5-title { margin-bottom: 2rem; color: var(--foreground-ink); text-align: center; }
+    #b5-cta { display: flex; align-items: center; gap: 1rem; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; overflow: hidden; padding: 0.5rem 1rem; border: 1px solid var(--foreground-ink); border-radius: 2rem; }
+    #b5-cta:hover #b5-cta-arrow { transform: translateX(0%); }
+    #b5-cta-arrow { transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1); transform: translateX(-150%); }
+
+    @media (max-width: 1024px) {
+      #block5 { height: 100vh; }
+      #b5-pin-container { width: min(342px, 50vw); }
+    }
+
+    /* Footer */
+    #footer { position: relative; background: var(--surface-glass); backdrop-filter: blur(20px); color: var(--foreground-accent); padding: 4rem 1.5rem 2rem; z-index: 20; }
+    .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; gap: 2rem; max-width: 1440px; margin: 0 auto; }
+    .footer-col { display: flex; flex-direction: column; gap: 1rem; }
+    .footer-head { font-size: var(--raw-text-caption); color: var(--foreground-accent-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer-link { font-size: var(--raw-text-body); cursor: pointer; }
+    .footer-link:hover { color: var(--raw-color-cream-100); }
+    #newsletter-input { background: transparent; border: none; border-bottom: 1px solid var(--foreground-accent-muted); color: var(--foreground-accent); padding: 0.5rem 0; outline: none; width: 100%; font-family: inherit; }
+    #newsletter-btn { background: var(--foreground-accent); color: var(--raw-color-black); border: none; padding: 0.5rem 1.5rem; border-radius: 2rem; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; margin-top: 1rem; font-family: inherit; }
+    
+    #footer-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--foreground-accent-muted); max-width: 1440px; margin-inline: auto; }
+    .social-icons { display: flex; gap: 1rem; }
+    .social-icons img { height: 1.5rem; filter: invert(1); opacity: 0.8; cursor: pointer; }
+    .social-icons img:hover { opacity: 1; }
+
+    @media (max-width: 1024px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      #footer-bottom { flex-direction: column; gap: 2rem; text-align: center; }
+    }
+    @media (max-width: 640px) {
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="preloader">
+  <div class="wordmark"><span class="italic">W</span>anderlust</div>
+  <div id="preloader-counter" class="display" style="margin-top: 1rem; font-variant-numeric: tabular-nums;">00</div>
+</div>
+
+<section id="hero">
+  <video id="vid-base" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/hero/Hero-video.mp4" muted playsinline autoplay loop></video>
+  <div id="hero-grain"></div>
+  <div id="hero-veil"></div>
+  <img id="hero-still" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/hero/hero-final-frame.jpg" />
+
+  <div id="hero-ui-container">
+    <div class="chrome wordmark hero-group" id="wordmark-top" data-group="wordmark"><span class="italic">W</span>anderlust</div>
+    <nav class="chrome caption hero-group" id="nav-right" data-group="nav">
+      <div>BOOK NOW.</div><div>EXPERIENCE.</div><div>ABOUT.</div><div>CONTACT.</div><div>PARTNER WITH US</div>
+    </nav>
+    <div class="chrome caption uppercase hero-group" id="explore-btn" data-group="explore">explore Destinations</div>
+
+    <div id="lens-container" class="hero-group" data-group="card">
+      <div id="lens-inner">
+        <video id="vid-lens" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/hero/Hero-video.mp4" muted playsinline autoplay loop></video>
+      </div>
+      <div id="recording-light"></div>
+    </div>
+
+    <div id="captions-wrapper">
+      <div id="caption-follow" class="hero-group" data-group="captions">
+        <div id="caption-top" class="caption">TRAVEL STORIES · JOURNAL</div>
+        <div id="caption-bottom" class="caption">01. · REAL JOURNEYS · 42.</div>
+      </div>
+    </div>
+
+    <div id="titles" class="hero-group" data-group="titles">
+      <div id="title-start" class="display text-trim"><span class="italic">B</span>eyond <span class="italic">P</span>laces</div>
+      <div id="title-end" class="display text-trim"><div><span class="italic">I</span>nto</div><div><span class="italic">M</span>oments</div></div>
+    </div>
+
+    <div class="chrome caption uppercase hero-group" id="dest-list" data-group="destinations">
+      <div style="margin-bottom: 0.5rem; color: var(--foreground-accent);">ALL DESTINATIONS</div>
+      <div>Iceland</div><div>Norway</div><div>Japan</div><div>Indonesia</div>
+    </div>
+
+    <div class="chrome caption uppercase hero-group" id="view-modes" data-group="viewModes">
+      <span style="color: var(--foreground-accent);">SLIDER</span>
+      <span style="color: var(--foreground-accent-muted);">LIST</span>
+    </div>
+
+    <div id="thumbnails" class="hero-group" data-group="thumbnails">
+      <img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/hero/hero-thumb2.png" class="thumb top" alt="A traveller raising a camera over a glacial river valley" />
+      <img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/hero/hero-thumb2.png" class="thumb bottom" alt="A traveller raising a camera over a glacial river valley" />
+    </div>
+  </div>
+</section>
+
+<section id="block2">
+  <div id="b2-header" class="display text-trim">
+    <div><span class="italic">D</span>estinations</div>
+    <div><span class="italic">W</span>orth <span class="italic">W</span>andering</div>
+  </div>
+  
+  <div id="b2-list-left">
+<div class="b2-list-item caption" data-id="iceland">01. ICELAND</div><div class="b2-list-item caption" data-id="norway">02. NORWAY</div><div class="b2-list-item caption" data-id="japan">03. JAPAN</div><div class="b2-list-item caption" data-id="morocco">04. MOROCCO</div><div class="b2-list-item caption" data-id="switzerland">05. SWITZERLAND</div><div class="b2-list-item caption" data-id="italy">06. ITALY</div><div class="b2-list-item caption" data-id="france">07. FRANCE</div><div class="b2-list-item caption" data-id="portugal">08. PORTUGAL</div>
+  </div>
+  <div id="b2-list-right">
+<div class="b2-list-item caption" data-id="spain">09. SPAIN</div><div class="b2-list-item caption" data-id="greece">10. GREECE</div><div class="b2-list-item caption" data-id="austria">11. AUSTRIA</div><div class="b2-list-item caption" data-id="canada">12. CANADA</div><div class="b2-list-item caption" data-id="new-zealand">13. NEW ZEALAND</div><div class="b2-list-item caption" data-id="australia">14. AUSTRALIA</div><div class="b2-list-item caption" data-id="slovenia">15. SLOVENIA</div><div class="b2-list-item caption" data-id="istanbul">16. ISTANBUL</div>
+  </div>
+
+  <div id="b2-scene-container" style="position: absolute; inset: 0;">
+<div class="polaroid-pos b2-card" data-id="iceland" data-z="7" style="left: calc(982.59 / 14.4 * 1cqw); top: calc(370.28 / 14.4 * 1cqw); width: calc(212.092 / 14.4 * 1cqw); z-index: 7;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Iceland.png" alt="A polaroid captioned ICELAND" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="norway" data-z="11" style="left: calc(311.23 / 14.4 * 1cqw); top: calc(116.27 / 14.4 * 1cqw); width: calc(177.669 / 14.4 * 1cqw); z-index: 11;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Norway.png" alt="A polaroid captioned NORWAY" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="japan" data-z="15" style="left: calc(441.86 / 14.4 * 1cqw); top: calc(352.08 / 14.4 * 1cqw); width: calc(193.726 / 14.4 * 1cqw); z-index: 15;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Japan.png" alt="A polaroid captioned JAPAN" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="morocco" data-z="16" style="left: calc(381.73 / 14.4 * 1cqw); top: calc(551.64 / 14.4 * 1cqw); width: calc(191.631 / 14.4 * 1cqw); z-index: 16;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Morocco.png" alt="A polaroid captioned MOROCCO" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="switzerland" data-z="13" style="left: calc(164.38 / 14.4 * 1cqw); top: calc(44.99 / 14.4 * 1cqw); width: calc(223.278 / 14.4 * 1cqw); z-index: 13;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Switzerland.png" alt="A polaroid captioned SWITZERLAND" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="italy" data-z="10" style="left: calc(292.65 / 14.4 * 1cqw); top: calc(406.16 / 14.4 * 1cqw); width: calc(185.295 / 14.4 * 1cqw); z-index: 10;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Italy.png" alt="A polaroid captioned ITALY" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="france" data-z="4" style="left: calc(723.58 / 14.4 * 1cqw); top: calc(413.78 / 14.4 * 1cqw); width: calc(208.139 / 14.4 * 1cqw); z-index: 4;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/France.png" alt="A polaroid captioned FRANCE" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="portugal" data-z="1" style="left: calc(1154.05 / 14.4 * 1cqw); top: calc(544.61 / 14.4 * 1cqw); width: calc(212.092 / 14.4 * 1cqw); z-index: 1;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Portugal.png" alt="A polaroid captioned PORTUGAL" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="spain" data-z="8" style="left: calc(867.36 / 14.4 * 1cqw); top: calc(398.36 / 14.4 * 1cqw); width: calc(144.16 / 14.4 * 1cqw); z-index: 8;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Spain.png" alt="A polaroid captioned SPAIN" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="greece" data-z="14" style="left: calc(1285.05 / 14.4 * 1cqw); top: calc(82.61 / 14.4 * 1cqw); width: calc(212.092 / 14.4 * 1cqw); z-index: 14;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Greece.png" alt="A polaroid captioned GREECE" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="austria" data-z="12" style="left: calc(1164.92 / 14.4 * 1cqw); top: calc(137.61 / 14.4 * 1cqw); width: calc(211.111 / 14.4 * 1cqw); z-index: 12;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Austria.png" alt="A polaroid captioned AUSTRIA" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="canada" data-z="5" style="left: calc(802.95 / 14.4 * 1cqw); top: calc(566.67 / 14.4 * 1cqw); width: calc(182.347 / 14.4 * 1cqw); z-index: 5;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Canada.png" alt="A polaroid captioned CANADA" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="new-zealand" data-z="3" style="left: calc(1381.78 / 14.4 * 1cqw); top: calc(137.49 / 14.4 * 1cqw); width: calc(197.924 / 14.4 * 1cqw); z-index: 3;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/New%20Zealand.png" alt="A polaroid captioned NEW ZEALAND" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="australia" data-z="6" style="left: calc(1065.79 / 14.4 * 1cqw); top: calc(471.88 / 14.4 * 1cqw); width: calc(172.42 / 14.4 * 1cqw); z-index: 6;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Australia.png" alt="A polaroid captioned AUSTRALIA" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="slovenia" data-z="9" style="left: calc(576.63 / 14.4 * 1cqw); top: calc(452.42 / 14.4 * 1cqw); width: calc(208.582 / 14.4 * 1cqw); z-index: 9;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Slovenia.png" alt="A polaroid captioned SLOVENIA" class="polaroid-img" /></div></div><div class="polaroid-pos b2-card" data-id="istanbul" data-z="2" style="left: calc(654.54 / 14.4 * 1cqw); top: calc(319.71 / 14.4 * 1cqw); width: calc(190.046 / 14.4 * 1cqw); z-index: 2;"><div class="polaroid-inner"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Istanbul.png" alt="A polaroid captioned ISTANBUL" class="polaroid-img" /></div></div>
+<img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Sticker1-art.png" class="sticker" style="left: calc(364.53 / 14.4 * 1cqw); top: calc(328.1594 / 14.4 * 1cqw); width: calc(54.6133 / 14.4 * 1cqw); height: calc(66.3188 / 14.4 * 1cqw);" /><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Sticker3.png" class="sticker" style="left: calc(618.97 / 14.4 * 1cqw); top: calc(347.5557 / 14.4 * 1cqw); width: calc(40.6249 / 14.4 * 1cqw); height: calc(47.1114 / 14.4 * 1cqw);" /><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block2/Sticker4.png" class="sticker" style="left: calc(1075.5 / 14.4 * 1cqw); top: calc(338.5 / 14.4 * 1cqw); width: calc(35 / 14.4 * 1cqw); height: calc(29 / 14.4 * 1cqw);" />
+  </div>
+</section>
+
+<section id="block3" style="height: 200vh;">
+  <div id="b3-pin-container">
+    <img id="b3-bg-img" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 3/pexels-arthousestudio-4344885.jpg" />
+    <div id="b3-scrim"></div>
+    <div id="b3-content">
+      <div id="b3-headline" class="display text-trim">
+        <div><span class="b3-word"><span class="italic">G</span>o</span> <span class="b3-word"><span class="italic">S</span>omewhere</span> <span class="b3-word"><span class="italic">T</span>hat</span> </div>
+        <div><span class="b3-word"><span class="italic">S</span>tays</span> </div>
+        <div><span class="b3-word"><span class="italic">W</span>ith</span> <span class="b3-word"><span class="italic">Y</span>ou</span> </div>
+      </div>
+      <div id="b3-left-para">We plan trips for the moments you'll still<br/>talk about years later.</div>
+      <div id="b3-right-para">The quiet mornings, the unexpected turns,<br/>the places you almost didn't find.</div>
+      <img id="b3-collage" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 3/Collage.png" />
+      <div id="b3-signoff">Less ticking places off a list.<br/>More actually being there.</div>
+    </div>
+  </div>
+</section>
+
+<section id="block4">
+  <div id="b4-header">
+    <div class="display text-trim"><span class="italic">H</span>ow <span class="italic">W</span>e <span class="italic">T</span>ravel</div>
+    <div class="caption" style="margin-top: 1rem;">Different trips, same intention.</div>
+  </div>
+  <div id="b4-panels">
+    <div class="b4-panel active">
+      <div class="b4-panel-img-wrap"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block4/OpenedImage1.png" class="b4-panel-img" alt="Four travellers in bright rain jackets cheering on a mossy clifftop above a canyon" /></div>
+      <div class="b4-panel-scrim"></div>
+      <div class="b4-panel-content">
+        <div class="wordmark text-trim"><span class="italic">S</span>mall <span class="italic">G</span>roup <span class="italic">T</span>rips</div>
+        <div style="max-width: 390px;">We travel in small groups so everyone feels included, heard and free to be themselves.</div>
+        <div style="font-family: var(--typeface-hand); font-size: 1.5rem;">More connection, less crowd.</div>
+      </div>
+    </div>
+    <div class="b4-panel">
+      <div class="b4-panel-img-wrap"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block4/OpenedImage2.png" class="b4-panel-img" alt="A white car alone on a road across black sand, under a jagged mountain ridge" /></div>
+      <div class="b4-panel-scrim"></div>
+      <div class="b4-panel-content">
+        <div class="wordmark text-trim"><span class="italic">R</span>oad <span class="italic">T</span>rips</div>
+        <div style="max-width: 420px;">Scenic roads, unexpected stops and the freedom to change the plan when it feels right.</div>
+        <div style="font-family: var(--typeface-hand); font-size: 1.5rem;">The best views aren't on Google Maps.</div>
+      </div>
+    </div>
+    <div class="b4-panel">
+      <div class="b4-panel-img-wrap"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block4/OpenedImage3.png" class="b4-panel-img" alt="A traveller standing on wet rocks beside a turquoise waterfall" /></div>
+      <div class="b4-panel-scrim"></div>
+      <div class="b4-panel-content">
+        <div class="wordmark text-trim"><span class="italic">H</span>andpicked <span class="italic">S</span>tays</div>
+        <div style="max-width: 400px;">We choose places with soul. Local, beautiful, comfortable and run by people who care.</div>
+        <div style="font-family: var(--typeface-hand); font-size: 1.5rem;">Stay somewhere you'll remember.</div>
+      </div>
+    </div>
+    <div class="b4-panel">
+      <div class="b4-panel-img-wrap"><img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block4/OpenedImage4.png" class="b4-panel-img" alt="Four people around a picnic table with warm mugs, snow-dusted hills behind them" /></div>
+      <div class="b4-panel-scrim"></div>
+      <div class="b4-panel-content">
+        <div class="wordmark text-trim"><span class="italic">L</span>ocal <span class="italic">E</span>xperiences</div>
+        <div style="max-width: 490px;">We meet local people, try real food, learn the stories and see the places that don't make it to the guidebooks.</div>
+        <div style="font-family: var(--typeface-hand); font-size: 1.5rem;">The heart of the journey.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="block5" style="height: 200vh;">
+  <div id="b5-pin-container-sticky" style="position: sticky; top: 0; width: 100vw; height: 100vh; overflow: hidden;">
+    <svg width="0" height="0">
+      <filter id="b5-steam-wisps">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise">
+          <animate attributeName="baseFrequency" values="0.01;0.015;0.01" dur="28s" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="40" xChannelSelector="R" yChannelSelector="G" />
+        <feComponentTransfer>
+          <feFuncA type="gamma" amplitude="3" exponent="3" offset="0"/>
+        </feComponentTransfer>
+      </filter>
+    </svg>
+    <img id="b5-bg" class="b5-layer" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/BackgroundImage.png" />
+    <img id="b5-far" class="b5-layer" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/03_mountains_midground 1.png" />
+    <img id="b5-steam" class="b5-layer" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/02_steam_screen_blend 1.png" style="mix-blend-mode: screen;" />
+    <img id="b5-fg" class="b5-layer" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/01_foreground 1.png" />
+    <div id="b5-scrim"></div>
+    
+    <div id="b5-content">
+      <div id="b5-pin-container">
+        <img id="b5-pin-img" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/Pin.png" />
+        <div id="b5-note-text">
+          <div class="b5-line-mask">TELL US WHAT YOU'RE</div><br/>
+          <div class="b5-line-mask">DREAMING OF. WE'LL SHAPE</div><br/>
+          <div class="b5-line-mask">THE JOURNEY.</div>
+        </div>
+        <div id="b5-aside">ready when you are</div>
+      </div>
+      <div id="b5-title" class="display text-trim"><span class="italic">P</span>lan a <span class="italic">J</span>ourney</div>
+      <div id="b5-cta">
+        <span>Start planning</span>
+        <img id="b5-cta-arrow" src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/Icon1.svg" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="footer">
+  <div class="footer-grid">
+    <div class="footer-col" style="grid-column: span 2;">
+      <div class="wordmark"><span class="italic">W</span>anderlust</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-head">Destinations</div>
+      <div class="footer-link">Iceland</div><div class="footer-link">Norway</div><div class="footer-link">Japan</div><div class="footer-link">Indonesia</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-head">Experiences</div>
+      <div class="footer-link">Adventure</div><div class="footer-link">Nature</div><div class="footer-link">Culture</div><div class="footer-link">Slow Travel</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-head">Company</div>
+      <div class="footer-link">About Us</div><div class="footer-link">Journal</div><div class="footer-link">Testimonials</div><div class="footer-link">Contact</div>
+      <div style="margin-top: 2rem;" class="footer-head">Newsletter</div>
+      <div>Stories, guides & ideas for wherever you're headed next.</div>
+      <div style="display: flex; gap: 1rem; align-items: flex-end;">
+        <input type="text" id="newsletter-input" placeholder="Your e-mail" />
+        <button id="newsletter-btn">Subscribe</button>
+      </div>
+    </div>
+  </div>
+  <div id="footer-bottom">
+    <div class="caption">© 2026 Red Flag World Holdings Ltd. All rights reserved.</div>
+    <div class="social-icons">
+      <img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/SocialMedia1.svg" />
+      <img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/SocialMedia2.svg" />
+      <img src="https://storage.getlayers.ai/assets/wanderlust-555800a518/Block 5/SocialMedia3.png" />
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  import Lenis from 'lenis';
+  const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  const lenis = new Lenis({ lerp: 0.1 });
+  function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  
+  // Springs
+  class Spring {
+    constructor(tension, friction, val) {
+      this.t = tension; this.f = friction;
+      this.val = val; this.target = val; this.v = 0;
+    }
+    update(dt) {
+      let a = -this.t * (this.val - this.target) - this.f * this.v;
+      this.v += a * dt; this.val += this.v * dt;
+      return this.val;
+    }
+  }
+
+  // Preloader
+  const preloader = document.getElementById('preloader');
+  const counter = document.getElementById('preloader-counter');
+  const vidBase = document.getElementById('vid-base');
+  const vidLens = document.getElementById('vid-lens');
+  
+  lenis.stop();
+  let countStart = performance.now();
+  let lifted = false;
+  
+  vidBase.playbackRate = 2;
+  vidLens.playbackRate = 2;
+
+  function updatePreloader() {
+    let now = performance.now();
+    let p = (now - countStart) / 1200;
+    if (p > 1) p = 1;
+    counter.innerText = Math.floor(p * 100).toString().padStart(2, '0');
+    
+    if (p === 1 && !lifted) {
+      if (vidBase.readyState >= 2 && now - countStart > 2200 - 1200 - 780) {
+        setTimeout(() => {
+          preloader.classList.add('lift');
+          lenis.start();
+          startHero();
+        }, 340);
+        lifted = true;
+      }
+    }
+    if (!lifted) requestAnimationFrame(updatePreloader);
+  }
+  requestAnimationFrame(updatePreloader);
+
+  // Hero
+  const veil = document.getElementById('hero-veil');
+  const still = document.getElementById('hero-still');
+  const lensContainer = document.getElementById('lens-container');
+  const lensInner = document.getElementById('lens-inner');
+  const recLight = document.getElementById('recording-light');
+  const capFollow = document.getElementById('caption-follow');
+  const heroGroups = Array.from(document.querySelectorAll('.hero-group'));
+  
+  let heroStartedAt = 0;
+  let heroActive = false;
+  
+  function startHero() {
+    heroStartedAt = performance.now();
+    heroActive = true;
+    vidBase.play();
+    vidLens.play();
+    requestAnimationFrame(tickHero);
+  }
+
+  // Pointer
+  let mx = window.innerWidth / 2;
+  let my = window.innerHeight / 2;
+  let hasMoved = false;
+  window.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY; hasMoved = true;
+  });
+
+  let cardX = 0, cardY = 0;
+  const cardLerp = 0.08;
+  
+  // Layout recalc for lens inner
+  let lensRect = { left: 0, top: 0, width: 0, height: 0 };
+  function calcLens() {
+    let orig = lensContainer.style.transform;
+    lensContainer.style.transform = 'none';
+    lensRect = lensContainer.getBoundingClientRect();
+    lensContainer.style.transform = orig;
+    
+    lensInner.style.left = -lensRect.left + 'px';
+    lensInner.style.top = -lensRect.top + 'px';
+    lensInner.style.width = window.innerWidth + 'px';
+    lensInner.style.height = window.innerHeight + 'px';
+    lensInner.style.transformOrigin = `${lensRect.left + lensRect.width/2}px ${lensRect.top + lensRect.height/2}px`;
+  }
+  window.addEventListener('resize', calcLens);
+  calcLens();
+
+  const UI_ORDER = ["card","captions","titles","wordmark","nav","explore","destinations","viewModes","thumbnails"];
+  function smooth(t) { let x = Math.min(1, Math.max(0, t)); return x * x * (3 - 2 * x); }
+  
+  let recV = 1; let recTarget = 0.18; let lastTime = performance.now();
+  
+  function tickHero(time) {
+    if (!heroActive) return;
+    let dt = (time - lastTime) / 1000;
+    if(dt > 0.1) dt = 0.016;
+    lastTime = time;
+
+    let t = time - heroStartedAt;
+    
+    // Veil
+    let veilP = t / 900;
+    veil.style.opacity = Math.min(1, veilP);
+
+    // Assembly
+    let duration = vidBase.duration || 4;
+    let timeToEnd = duration - vidBase.currentTime;
+    let assemblyStartMs = Math.max(0, (duration - 0.4) * 1000); // media seconds
+    if (t > 8000) assemblyStartMs = 0; // fallback
+    
+    let aP = Math.max(0, (time - (heroStartedAt + assemblyStartMs)) / 2400);
+    if(aP > 1) aP = 1;
+
+    let s = 0.62 + (1 - 0.62) * smooth(aP / 0.3); // card scale
+    if(aP === 0) s = 0.62;
+
+    heroGroups.forEach(el => {
+      let g = el.getAttribute('data-group');
+      let idx = UI_ORDER.indexOf(g);
+      let uiStart = g === "card" ? 0 : 0.3 + (idx - 1) * 0.055;
+      let uiDur = g === "card" ? 0.3 : 0.2;
+      let e = smooth((aP - uiStart) / uiDur);
+      
+      if (g === "card") {
+        el.style.opacity = e > 0 ? 1 : 0;
+      } else {
+        el.style.opacity = e;
+        el.style.transform = `translateY(${(1 - e) * 1.25}rem)`;
+      }
+    });
+
+    // Still swap
+    if (timeToEnd < 1/30 && !vidBase.paused) {
+      vidBase.pause(); vidLens.pause();
+      still.style.opacity = 1;
+      still.style.transition = "opacity 0.52s ease";
+    }
+
+    const isTouch = window.matchMedia("(max-width: 1024px)").matches || !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    // Pointer follow
+    if (!isTouch && hasMoved) {
+      let tx = (mx - window.innerWidth/2) * 0.1;
+      let ty = (my - window.innerHeight/2) * 0.1;
+      cardX += (tx - cardX) * cardLerp;
+      cardY += (ty - cardY) * cardLerp;
+    } else {
+      cardX += (0 - cardX) * cardLerp;
+      cardY += (0 - cardY) * cardLerp;
+    }
+    
+    if(!isReduced) {
+      lensContainer.style.transform = `translate3d(${cardX}px, ${cardY}px, 0) scale(${s})`;
+      lensInner.style.transform = `scale(${1/s}) translate3d(${-cardX}px, ${-cardY}px, 0)`;
+      capFollow.style.transform = `translate3d(${cardX}px, ${cardY}px, 0)`;
+      
+      // Rec Light
+      let a = -100 * (recV - recTarget) - 20 * 0; // rough spring
+      recV += a * dt; 
+      if(Math.abs(recV - recTarget) < 0.1) {
+        recTarget = recTarget === 1 ? 0.18 : 1;
+      }
+      recLight.style.opacity = recV;
+    } else {
+      lensContainer.style.transform = `scale(${s})`;
+      lensInner.style.transform = `scale(${1/s})`;
+    }
+
+    if (aP < 1 || timeToEnd > 0) requestAnimationFrame(tickHero);
+  }
+
+  // Block 2
+  const b2Scene = document.getElementById('b2-scene-container');
+  const b2Cards = Array.from(document.querySelectorAll('.b2-card'));
+  const b2Items = Array.from(document.querySelectorAll('.b2-list-item'));
+  
+  let b2State = { active: null, springs: {} };
+  b2Cards.forEach(c => {
+    b2State.springs[c.dataset.id] = {
+      y: new Spring(300, 30, 0),
+      s: new Spring(300, 30, 1),
+      rx: new Spring(190, 26, 0),
+      ry: new Spring(190, 26, 0),
+      br: new Spring(150, 26, 0.45)
+    };
+    c.addEventListener('mouseenter', () => { b2State.active = c.dataset.id; });
+    c.addEventListener('mouseleave', () => { b2State.active = null; });
+  });
+  b2Items.forEach(i => {
+    i.addEventListener('mouseenter', () => { b2State.active = i.dataset.id; });
+    i.addEventListener('mouseleave', () => { b2State.active = null; });
+  });
+
+  function tickB2(dt) {
+    if(isReduced) return;
+    b2Cards.forEach(c => {
+      let id = c.dataset.id;
+      let sp = b2State.springs[id];
+      let isActive = b2State.active === id;
+      
+      sp.y.target = isActive ? -6 : 0;
+      sp.s.target = isActive ? 1.025 : 1;
+      sp.br.target = isActive ? 1 : 0.45;
+      
+      let mxN = (mx / window.innerWidth) * 2 - 1;
+      let myN = (my / window.innerHeight) * 2 - 1;
+      
+      sp.rx.target = isActive ? -myN * 14 : 0;
+      sp.ry.target = isActive ? mxN * 18 : 0;
+      
+      let y = sp.y.update(dt);
+      let s = sp.s.update(dt);
+      let rx = sp.rx.update(dt);
+      let ry = sp.ry.update(dt);
+      let br = sp.br.update(dt);
+      
+      c.style.transform = `translate(-50%, -50%) translate3d(0, ${y}px, ${isActive ? 40 : 0}px) scale(${s}) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      c.querySelector('.polaroid-inner').style.filter = `brightness(${br})`;
+      if(isActive) c.style.zIndex = 50;
+      else c.style.zIndex = c.dataset.z || 10;
+    });
+  }
+
+  // Block 3
+  const b3Pin = document.getElementById('b3-pin-container');
+  const b3Bg = document.getElementById('b3-bg-img');
+  const b3Words = Array.from(document.querySelectorAll('.b3-word'));
+  const b3Others = [
+    document.getElementById('b3-left-para'),
+    document.getElementById('b3-right-para'),
+    document.getElementById('b3-collage'),
+    document.getElementById('b3-signoff')
+  ];
+  
+  function tickB3() {
+    let rect = document.getElementById('block3').getBoundingClientRect();
+    let p = -rect.top / (rect.height - window.innerHeight);
+    p = Math.max(0, Math.min(1, p));
+    
+    if(!isReduced) b3Bg.style.transform = `translateY(${p * -25}%)`;
+    
+    b3Words.forEach((w, i) => {
+      let start = i * 0.03;
+      let wp = (p - start) / 0.14;
+      wp = smooth(wp);
+      w.style.opacity = wp;
+      if(!isReduced) w.style.transform = `translateY(${(1 - wp) * 0.28}em)`;
+    });
+    
+    let op = (p - 0.14) / 0.86;
+    b3Others.forEach((el, i) => {
+      if(!el) return;
+      let ep = smooth((op - i * 0.05) / 0.28);
+      el.style.opacity = ep;
+      if(!isReduced) el.style.transform = el.id.includes('collage') ? `rotate(7deg) translateY(${(1 - ep) * 2}rem)` : `translateY(${(1 - ep) * 1.25}rem)`;
+    });
+  }
+
+  // Block 4
+  const panels = Array.from(document.querySelectorAll('.b4-panel'));
+  panels.forEach(p => {
+    p.addEventListener('mouseenter', () => {
+      panels.forEach(op => op.classList.remove('active'));
+      p.classList.add('active');
+    });
+  });
+
+  // Block 5
+  const b5Pin = document.getElementById('b5-pin-container');
+  const b5Far = document.getElementById('b5-far');
+  const b5Steam = document.getElementById('b5-steam');
+  const b5Fg = document.getElementById('b5-fg');
+  const b5Lines = Array.from(document.querySelectorAll('.b5-line-mask'));
+  const b5Aside = document.getElementById('b5-aside');
+  
+  let b5px = new Spring(90, 30, 0);
+  let b5py = new Spring(90, 30, 0);
+
+  function tickB5(dt) {
+    let rect = document.getElementById('block5').getBoundingClientRect();
+    let p = -rect.top / (rect.height - window.innerHeight);
+    p = Math.max(0, Math.min(1, p));
+
+    // Note writing
+    let writeP = (p - 0.35) / 0.5;
+    writeP = Math.max(0, Math.min(1, writeP));
+    
+    b5Lines.forEach((l, i) => {
+      let lp = (writeP - i * 0.2) / 0.6;
+      lp = Math.max(0, Math.min(1, lp));
+      l.style.width = (lp * 100) + '%';
+    });
+    
+    let ap = (p - 0.85) / 0.15;
+    if(b5Aside) b5Aside.style.opacity = Math.max(0, Math.min(1, ap));
+    
+    if(!isReduced) {
+      b5Pin.style.transform = `rotateX(${-9 + writeP * 9}deg)`;
+
+      // Parallax
+      let mxN = (mx / window.innerWidth) * 2 - 1;
+      let myN = (my / window.innerHeight) * 2 - 1;
+      
+      b5px.target = mxN; b5py.target = myN;
+      let px = b5px.update(dt); let py = b5py.update(dt);
+      
+      b5Far.style.transform = `translate(${px * 8}px, ${py * 5}px)`;
+      b5Steam.style.transform = `translate(${px * 16}px, ${py * 10}px)`;
+      b5Fg.style.transform = `translate(${px * 28}px, ${py * 16}px)`;
+    }
+  }
+
+  let lastT = performance.now();
+  function masterTick(t) {
+    let dt = (t - lastT) / 1000;
+    if(dt > 0.1) dt = 0.016;
+    lastT = t;
+    
+    tickB2(dt);
+    tickB3();
+    tickB5(dt);
+    
+    requestAnimationFrame(masterTick);
+  }
+  requestAnimationFrame(masterTick);
+
+</script>
+</body>
+</html>
