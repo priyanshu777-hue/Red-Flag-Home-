@@ -1,0 +1,9 @@
+version: 1
+status: LOCKED (direction chosen from user brief "luxury and high-end"; user to confirm on delivery)
+visual_thesis: "A private dossier for owners — quiet black, ivory serif, one red signature."
+style_input: "brand-derived (index.html tokens + logo) over luxury-premium-brand palette intent"
+intended_tokens:
+  palette: {bg: "#0C0B0A", surface: "#161412", ink: "#F3EBDD", muted: "#A39B8E", hairline: "#3A342D", champagne: "#C8B48A", red: "#FF3B30"}
+  typography: {display: "Instrument Serif", body: "Inter Tight"}
+visual_grammar: {margins_in: 0.8, labels: "Inter Tight caps, tracked +300", numerals: "Instrument Serif, brand red", rules: "0.75pt champagne/hairline"}
+forbidden_patterns: [card grids with fills, gradients as decoration, drop shadows, more than one accent colour, stretched images]
