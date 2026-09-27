@@ -1,0 +1,11 @@
+version: 1
+status: LOCKED (chosen from brief: consumer first impression, fresh images, aesthetic fonts)
+visual_thesis: "Sunlit hospitality — ivory paper, warm Fraunces serif, brass details, logo red used sparingly."
+tokens:
+  light: {bg: "#F6F1EA", paper: "#ECE4D8", ink: "#1C1A17", body: "#4A443D", muted: "#8A8074", hair: "#D9CFC1"}
+  dark: {bg: "#161311", paper: "#221E1A", ink: "#F3ECE1", muted: "#A89E91", hair: "#3B352E"}
+  accents: {brass: "#A8834A", red: "#D93A2F"}
+typography: {display: "Fraunces (SOFT 50, opsz 96)", body: "Manrope 400/700"}
+rhythm: "light content slides; dark slides for promise, earn-back, divider, NRI and CTA"
+motion: "motion.py from visibility-booster: fades, wipe rules, ascend headlines; morph logo 1->2 and 23->24"
+images: "5 frames from brand videos (hero, bonfire, host, pool) + 15 Unsplash (free licence)"
