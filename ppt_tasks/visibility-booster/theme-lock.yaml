@@ -7,3 +7,8 @@ intended_tokens:
   typography: {display: "Instrument Serif", body: "Inter Tight"}
 visual_grammar: {margins_in: 0.8, labels: "Inter Tight caps, tracked +300", numerals: "Instrument Serif, brand red", rules: "0.75pt champagne/hairline"}
 forbidden_patterns: [card grids with fills, gradients as decoration, drop shadows, more than one accent colour, stretched images]
+# v2 — motion + rhythm
+motion_dial: 4  # slow fades; no fly-ins/bounces; each slide's content settles within ~2s
+transitions: {default: "fade slow", section_changes: "fade through black (1,3,6,10,13)", morph: "2 (logo cover->corner), 14 (logo corner->CTA)"}
+builds: {rules: "wipe from left", type_17pt_plus: "float in (ascend, 3.5% rise)", other: "fade", trigger: "auto after previous, staggered in reading order"}
+added_pages: ["Divider I (lounge photo)", "Divider II (dune cabin photo)"]

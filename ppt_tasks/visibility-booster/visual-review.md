@@ -22,3 +22,11 @@ Round 2: all 12 slides re-rendered and inspected; no overflow, overlap or clippi
 
 Note: fonts Instrument Serif + Inter Tight (Google Fonts) must be installed on the presenting machine;
 the ₹ glyph falls back to a system font.
+
+## Round 3 — v2 (animation + refinement), 14 slides
+- Added section dividers I and II (brand photography, large serif numerals); CTA photo swapped so the villa only opens the deck.
+- Divider II title contrast over the bright dune photo -> veil raised to 50%. Numerals set as solid type (outline text renders inconsistently between PowerPoint and LibreOffice).
+- Motion check: LibreOffice re-import of the PPTX recognises every build (Fade / Wipe / Ascend, after-previous + with-previous) and every transition.
+  Structural check: schema child order, unique timing ids, all animation targets exist.
+- Not verifiable here: Morph playback itself (needs PowerPoint 2019/365; older viewers fall back to fade).
+All MUST requirements remain PASS.

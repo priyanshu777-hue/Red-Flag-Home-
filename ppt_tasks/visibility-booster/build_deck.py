@@ -15,6 +15,8 @@ from pptx_designer.tools.layout import add_slide, clean_save
 from pptx_designer.tools.shapes import rect
 from pptx_designer.tools.text import text
 
+import motion
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 ASSETS = HERE / "assets"
@@ -30,14 +32,17 @@ C = {
 SERIF, SANS = "Instrument Serif", "Inter Tight"
 W, H = 13.333, 7.5
 M = 0.8  # outer margin
-TOTAL = 12
+TOTAL = 14
 
 
 def prep_assets():
     ASSETS.mkdir(exist_ok=True)
     out = {}
     for key, name in {"villa": "handpicked.jpeg", "guest": "guest.JPEG", "clean": "cleaning.JPEG",
-                      "street": "how-we-host.jpg"}.items():
+                      "street": "how-we-host.jpg",
+                      "lounge": "franchise-asset/scenes/interior-details.webp",
+                      "dunes": "franchise-asset/footer/footer-bg.webp",
+                      "cabin": "franchise-asset/scenes/sequence/desktop/204.webp"}.items():
         dst = ASSETS / f"{key}.jpg"
         if not dst.exists():
             im = Image.open(ROOT / name).convert("RGB")
@@ -66,27 +71,49 @@ def T(slide, x, y, w, h, txt, size=12, font=SANS, color="ink", italic=False, bol
 
 
 def rule(slide, x, y, w, color="hairline", thick=0.012):
-    rect(slide, x, y, w, thick, C[color], C=C)
+    return rect(slide, x, y, w, thick, C[color], C=C)
 
 
 def veil(slide, x, y, w, h, alpha_pct):
     """Flat background-colour overlay at the given opacity (keeps photos quiet under type)."""
     shp = rect(slide, x, y, w, h, C["background"], C=C)
+    shp.name = "static-veil"
     clr = shp.fill._xPr.find(qn("a:solidFill"))[0]
     clr.append(clr.makeelement(qn("a:alpha"), {"val": str(alpha_pct * 1000)}))
     return shp
 
 
 def vrule(slide, x, y, h, color="hairline"):
-    rect(slide, x, y, 0.012, h, C[color], C=C)
+    return rect(slide, x, y, 0.012, h, C[color], C=C)
 
 
 def label(slide, x, y, w, txt, color="champagne", size=9, align="left"):
-    T(slide, x, y, w, 0.3, txt, size=size, color=color, spacing=300, caps=True, align=align)
+    return T(slide, x, y, w, 0.3, txt, size=size, color=color, spacing=300, caps=True, align=align)
 
 
 def logo(slide, A, x, y, size):
-    slide.shapes.add_picture(A["logo"], _in(x), _in(y), _in(size), _in(size))
+    # "!!" prefix pairs the logo across slides so Morph glides it between positions.
+    pic = slide.shapes.add_picture(A["logo"], _in(x), _in(y), _in(size), _in(size))
+    pic.name = "!!logo"
+    return pic
+
+
+def photo(slide, x, y, w, h, path):
+    pic = cover_image(slide, x, y, w, h, path)
+    pic.name = "static-photo"
+    return pic
+
+
+def mask(slide, x, y, w, h, direction, alpha_start=100, alpha_end=0):
+    shp = gradient_mask_image(slide, x, y, w, h, bg_color=C["background"], direction=direction,
+                              alpha_start=alpha_start, alpha_end=alpha_end)
+    shp.name = "static-mask"
+    return shp
+
+
+def chrome(shape):
+    shape.name = "chrome"
+    return shape
 
 
 def _in(v):
@@ -94,15 +121,30 @@ def _in(v):
     return Inches(v)
 
 
-def base(prs, n, A, mark=True):
+def base(prs, A, mark=True):
     s = add_slide(prs)
-    rect(s, 0, 0, W, H, C["background"], C=C)
+    n = len(prs.slides)
+    rect(s, 0, 0, W, H, C["background"], C=C).name = "static-bg"
     if mark:
         logo(s, A, W - M - 0.62, 0.36, 0.62)
-        label(s, M, 0.55, 5, "The Visibility Booster", color="muted", size=8)
-        T(s, W - M - 1.5, H - 0.55, 1.5, 0.25, f"{n:02d} / {TOTAL:02d}", size=8, color="muted",
-          spacing=200, align="right")
-        label(s, M, H - 0.55, 6, "Red Flag Homes Network", color="muted", size=8)
+        chrome(label(s, M, 0.55, 5, "The Visibility Booster", color="muted", size=8))
+        chrome(T(s, W - M - 1.5, H - 0.55, 1.5, 0.25, f"{n:02d} / {TOTAL:02d}", size=8, color="muted",
+                 spacing=200, align="right"))
+        chrome(label(s, M, H - 0.55, 6, "Red Flag Homes Network", color="muted", size=8))
+    return s
+
+
+def divider(prs, A, numeral, kicker, title, sub, img, veil_pct=30):
+    s = base(prs, A, mark=False)
+    photo(s, 0, 0, W, H, img)
+    veil(s, 0, 0, W, H, veil_pct)
+    mask(s, 0, 0, 9.0, H, "right")
+    logo(s, A, W - M - 0.62, 0.36, 0.62)
+    T(s, M - 0.05, 0.35, 7, 3.9, numeral, size=250, font=SERIF, color="champagne", leading=0.8)
+    label(s, M, 4.35, 8, kicker)
+    T(s, M, 4.7, 8.5, 1.0, title, size=54, font=SERIF, leading=0.9)
+    rule(s, M, 5.85, 3.2, "champagne")
+    T(s, M, 6.0, 6.5, 0.8, sub, size=14, color="muted", leading=1.3)
     return s
 
 
@@ -119,10 +161,9 @@ def build():
     prs.slide_width, prs.slide_height = _in(W), _in(H)
 
     # 1 — Cover ----------------------------------------------------------------
-    s = base(prs, 1, A, mark=False)
-    cover_image(s, 5.6, 0, W - 5.6, H, A["villa"])
-    gradient_mask_image(s, 5.6, 0, 2.2, H, bg_color=C["background"], direction="right",
-                        alpha_start=100, alpha_end=0)
+    s = base(prs, A, mark=False)
+    photo(s, 5.6, 0, W - 5.6, H, A["villa"])
+    mask(s, 5.6, 0, 2.2, H, "right", 100, 0)
     logo(s, A, M - 0.1, 0.55, 1.55)
     label(s, M, 2.55, 5, "Red Flag Homes Network  ·  Host Dossier")
     T(s, M, 2.85, 5.4, 2.4, "The Visibility\nBooster", size=74, font=SERIF, leading=0.88)
@@ -132,7 +173,7 @@ def build():
     label(s, M, H - 0.7, 5, "redflaghomes.in", color="muted", size=8)
 
     # 2 — Thesis ---------------------------------------------------------------
-    s = base(prs, 2, A)
+    s = base(prs, A)
     label(s, M, 1.7, 6, "The premise")
     T(s, M, 2.1, 8.4, 2.6, "Most empty listings\naren’t bad.", size=66, font=SERIF, leading=0.9)
     T(s, M, 4.0, 8.4, 1.3, "They’re invisible.", size=66, font=SERIF, italic=True, color="red")
@@ -147,8 +188,13 @@ def build():
     T(s, M, 6.1, 11, 0.4, "Everything that follows is a lever you control. Work down the list in order — "
       "the first five move the most.", size=11, color="champagne", italic=False)
 
+    # 3 — Divider I -----------------------------------------------------------------
+    divider(prs, A, "I", "Part one  ·  Levers 01–05", "The five that matter most.",
+            "They cost nothing — and they move occupancy faster than any amount of new furniture.",
+            A["lounge"])
+
     # 3 — Levers 01–03 ---------------------------------------------------------
-    s = base(prs, 3, A)
+    s = base(prs, A)
     label(s, M, 1.25, 6, "I  ·  The five that matter most")
     T(s, M, 1.55, 9, 0.8, "Start where the algorithm looks first.", size=34, font=SERIF)
     cw, g = 3.55, 0.37
@@ -164,13 +210,12 @@ def build():
          "availability signals the listing is alive. A calendar untouched for weeks is treated as stale."),
     ]
     for i, (n, t, b) in enumerate(items):
-        lever(s, M + i * (cw + g), 2.85, cw, n, t, b, title_size=24, body_size=12)
+        lever(s, M + i * (cw + g), 2.7, cw, n, t, b, title_size=24, body_size=12.5, num_size=54)
 
     # 4 — Levers 04–05 ---------------------------------------------------------
-    s = base(prs, 4, A)
-    cover_image(s, 0, 0, 4.7, H, A["guest"])
-    gradient_mask_image(s, 2.9, 0, 1.8, H, bg_color=C["background"], direction="left",
-                        alpha_start=100, alpha_end=0)
+    s = base(prs, A)
+    photo(s, 0, 0, 4.7, H, A["guest"])
+    mask(s, 2.9, 0, 1.8, H, "left", 100, 0)
     x1, x2, cw = 5.15, 9.25, 3.3
     label(s, x1, 1.25, 6, "I  ·  The five that matter most")
     T(s, x1, 1.75, 1, 0.6, "04", size=26, font=SERIF, color="red")
@@ -193,8 +238,13 @@ def build():
       "Wasting the new-listing boost at a price nobody books is the costliest mistake here.",
       size=11, color="muted", leading=1.25)
 
+    # 5 — Divider II ----------------------------------------------------------------
+    divider(prs, A, "II", "Part two  ·  Levers 06–14", "Nine more that compound.",
+            "Each is small on its own. Together they decide who sees you — and how often.",
+            A["dunes"], veil_pct=50)
+
     # 5 — Levers 06–09 ---------------------------------------------------------
-    s = base(prs, 5, A)
+    s = base(prs, A)
     label(s, M, 1.25, 11, "II  ·  Nine more that compound  —  the listing & the calendar")
     T(s, M, 1.55, 11, 0.8, "Be findable in every search you qualify for.", size=34, font=SERIF)
     grid = [
@@ -221,7 +271,7 @@ def build():
         T(s, cx + 0.85, cy + 0.72, gw - 0.85, 1.2, b, size=11, color="muted", leading=1.25)
 
     # 6 — Levers 10–14 ---------------------------------------------------------
-    s = base(prs, 6, A)
+    s = base(prs, A)
     label(s, M, 1.25, 11, "II  ·  Nine more that compound  —  reputation & reach")
     rows = [
         ("10", "Add weekly and monthly discounts",
@@ -252,10 +302,9 @@ def build():
       size=10.5, color="muted", leading=1.25)
 
     # 7 — This week --------------------------------------------------------------
-    s = base(prs, 7, A)
-    cover_image(s, 8.4, 0, W - 8.4, H, A["street"])
-    gradient_mask_image(s, 8.4, 0, 1.6, H, bg_color=C["background"], direction="right",
-                        alpha_start=100, alpha_end=0)
+    s = base(prs, A)
+    photo(s, 8.4, 0, W - 8.4, H, A["street"])
+    mask(s, 8.4, 0, 1.6, H, "right", 100, 0)
     label(s, M, 1.25, 6, "Your first week")
     T(s, M, 1.55, 7.5, 0.9, "Start with these five,\nthis week.", size=40, font=SERIF, leading=0.92)
     todo = [
@@ -274,11 +323,10 @@ def build():
       "against the previous fortnight.", size=10.5, color="champagne", italic=False)
 
     # 8 — Transition -------------------------------------------------------------
-    s = base(prs, 8, A, mark=False)
-    cover_image(s, 0, 0, W, H, A["clean"])
+    s = base(prs, A, mark=False)
+    photo(s, 0, 0, W, H, A["clean"])
     veil(s, 0, 0, W, H, 45)
-    gradient_mask_image(s, 0, 0, 8.2, H, bg_color=C["background"], direction="right",
-                        alpha_start=100, alpha_end=0)
+    mask(s, 0, 0, 8.2, H, "right", 100, 0)
     logo(s, A, W - M - 0.62, 0.36, 0.62)
     label(s, M, 1.9, 6, "Red Flag Outpost Classic", color="red")
     T(s, M, 2.3, 7.4, 2.2, "Or let someone do\nall fourteen for you.", size=58, font=SERIF, leading=0.9)
@@ -291,7 +339,7 @@ def build():
       "You pay rent and electricity. That’s the list.", size=12.5, leading=1.3)
 
     # 9 — Comparison -------------------------------------------------------------
-    s = base(prs, 9, A)
+    s = base(prs, A)
     label(s, M, 1.25, 6, "The difference")
     T(s, M, 1.55, 9, 0.8, "Your month, before and after.", size=34, font=SERIF)
     c0, c1, c2 = M, 4.1, 8.1
@@ -317,7 +365,7 @@ def build():
         T(s, c2, y + 0.18, 4.3, 0.4, c, size=12)
 
     # 10 — What it costs ------------------------------------------------------------
-    s = base(prs, 10, A)
+    s = base(prs, A)
     label(s, M, 1.25, 6, "What it costs")
     T(s, M, 1.55, 9, 0.8, "Transparent, from day one.", size=34, font=SERIF)
     tiers = [
@@ -344,7 +392,7 @@ def build():
     T(s, M, 6.55, 6, 0.3, "Prices plus applicable GST.", size=8, color="muted")
 
     # 11 — Earn-Back Promise ----------------------------------------------------------
-    s = base(prs, 11, A)
+    s = base(prs, A)
     label(s, M, 1.7, 6, "The Earn-Back Promise", color="red")
     T(s, M, 2.1, 11.5, 1.2, "Earn it back in 12 months.", size=64, font=SERIF, leading=0.9)
     T(s, M, 3.15, 11.5, 1.2, "Or we pay the difference.", size=64, font=SERIF, italic=True,
@@ -360,10 +408,9 @@ def build():
       "Full conditions in the Programme Terms.", size=9.5, color="muted")
 
     # 12 — CTA ------------------------------------------------------------------------
-    s = base(prs, 12, A, mark=False)
-    cover_image(s, 8.9, 0, W - 8.9, H, A["villa"])
-    gradient_mask_image(s, 8.9, 0, 1.6, H, bg_color=C["background"], direction="right",
-                        alpha_start=100, alpha_end=0)
+    s = base(prs, A, mark=False)
+    photo(s, 8.9, 0, W - 8.9, H, A["cabin"])
+    mask(s, 8.9, 0, 1.6, H, "right", 100, 0)
     logo(s, A, M - 0.1, 0.6, 1.45)
     label(s, M, 2.45, 6, "Apply for allocation")
     T(s, M, 2.8, 8, 1.1, "redflaghomes.in", size=64, font=SERIF, leading=0.9)
@@ -379,6 +426,14 @@ def build():
       "and depend on location, season, occupancy and costs; a property can earn less than its costs. "
       "Prices plus applicable GST. The Earn-Back Promise is subject to the Programme Terms.",
       size=7, color="muted", leading=1.2)
+
+    # Motion (theme lock: motion dial 4/10 — slow fades, no fly-ins, content settles in 2s) -----
+    plan = {1: ("fade", True), 2: ("morph", False), 3: ("fade", True), 6: ("fade", True),
+            10: ("fade", True), 13: ("fade", True), 14: ("morph", False)}
+    for i, slide in enumerate(prs.slides, start=1):
+        kind, black = plan.get(i, ("fade", False))
+        motion.transition(slide, kind, through_black=black)
+        motion.choreograph(slide)
 
     OUT.mkdir(exist_ok=True)
     path = OUT / "The_Visibility_Booster.pptx"
