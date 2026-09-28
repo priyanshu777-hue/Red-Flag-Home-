@@ -266,10 +266,10 @@ h1 span:nth-child(3){transition-delay:140ms}
 @media (max-width:700px){.resume{--gap:clamp(22px,4vh,40px)}}
 @media (max-height:700px){.resume{--gap:22px}}
 
-/* Short screens (small phones, phones in landscape): everything still fits one screen, no scroll.
+/* Short screens (phones in portrait with browser chrome, phones in landscape): everything still fits one screen, no scroll.
    The price, CTAs, pill and controller keep their sizes; only the space around them tightens.
    When a stage is shown the headline is invisible, so its caption takes the headline's slot. */
-@media (max-height:600px){
+@media (max-height:600px), (max-width:700px) and (max-height:800px){
   header{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:8px}
   .stage{display:grid;grid-template-columns:100%;grid-template-rows:auto auto auto auto 1fr;
     padding-top:calc(56px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
@@ -280,11 +280,42 @@ h1 span:nth-child(3){transition-delay:140ms}
   .caption{grid-area:4 / 1;margin-top:0;font-size:12px;line-height:1.4}
   .stage.picked .caption{grid-area:1 / 1;align-self:end}
   .foot{grid-area:5 / 1;align-self:end;margin:0 auto;padding-top:12px;gap:8px}
-  .eyebrow{display:none}
+  .eyebrow,.sub{display:none}
   h1{font-size:clamp(34px,5.4vw,44px)}
 }
-@media (max-height:600px) and (max-width:700px){.hero{min-height:52px}}
-@media (max-height:600px) and (max-width:360px){.stage{padding-left:12px;padding-right:12px}}
+@media (max-width:700px) and (max-height:800px){.hero{min-height:52px}}
+/* phones in landscape */
+@media (max-height:420px){
+  header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px}
+  .stage{padding-top:calc(50px + env(safe-area-inset-top,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+  h1{font-size:26px}
+  .hero{min-height:34px}
+  .foot{padding-top:6px;gap:6px}
+}
+
+/* The room: the three sample looks play inside the scene; this line names the one on screen */
+.media img.look{opacity:0;visibility:hidden;z-index:1;transition:none}
+.media img.look.on{opacity:1;visibility:visible}
+.media img.look.top{z-index:2}
+.looks{--gap:clamp(28px,5vh,56px);position:relative;z-index:21;height:0;flex:none}
+.looks-in{position:absolute;left:0;right:0;top:calc((var(--gap) - 24px) / 2);height:24px;display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:12px;letter-spacing:.02em;color:rgba(255,255,255,.76);text-shadow:0 1px 6px rgb(0 0 0 / .45);white-space:nowrap;
+  opacity:0;visibility:hidden;transition:opacity 400ms var(--ease),visibility 0s linear 400ms}
+.looks.on .looks-in{opacity:1;visibility:visible;transition:opacity 500ms var(--ease) 300ms,visibility 0s}
+.stage.resuming .looks-in{opacity:0;visibility:hidden}
+.looks-tag{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.looks-label{transition:opacity 300ms var(--ease)}
+.looks-dots{display:flex}
+.dot{width:24px;height:24px;border:0;padding:0;background:transparent;cursor:pointer;display:grid;place-items:center;border-radius:50%;
+  touch-action:manipulation}
+.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.34);transition:background 300ms var(--ease),transform 300ms var(--ease)}
+.dot[aria-current="true"]::before{background:#fff;transform:scale(1.3)}
+@media (hover:hover) and (pointer:fine){.dot:hover::before{background:rgba(255,255,255,.7)}}
+@media (max-width:700px){.looks{--gap:clamp(22px,4vh,40px)}}
+@media (max-width:360px){.looks-dots{display:none}}
+@media (max-height:700px){.looks{--gap:22px}.looks-in{height:18px;top:calc((var(--gap) - 18px) / 2)}.looks-dots{display:none}}
+@media (max-height:600px), (max-width:700px) and (max-height:800px){.looks{grid-area:2 / 1;--gap:16px}.looks-in{font-size:11px;height:16px;top:0}.looks-dots{display:none}}
+@media (max-width:360px) and (max-height:800px){.stage{padding-left:12px;padding-right:12px}}
 </style>
 </head>
 <body>
@@ -311,6 +342,7 @@ h1 span:nth-child(3){transition-delay:140ms}
   </div>
 
   <div class="resume" id="resume" aria-hidden="true"><span>Picking up where you left off</span></div>
+  <div class="looks" id="looks"><div class="looks-in"><span class="looks-tag">Sample image</span><span class="looks-label" id="looks-label"></span><span class="looks-dots" id="looks-dots" role="group" aria-label="Sample looks"></span></div></div>
 
   <div class="controller glass-wrap" id="controller" role="group" aria-label="See what changes">
     <div class="glass track" id="track" aria-hidden="true"></div>
@@ -396,6 +428,13 @@ h1 span:nth-child(3){transition-delay:140ms}
   /* ---- scene engine: WebGL dissolve, with the CSS wipe as the fallback ---- */
   var EASE = 'cubic-bezier(0.22,1,0.36,1)', DUR = 900, REDUCED_FADE = 150;
   var STANDIN = 'drop/studio-noir/sample-kitchenette.jpg';   // shown, graded per stage, until all five plates load
+  // "The room" plays these sample looks in sequence. Empty the list to show the room plate instead.
+  var ROOM_LOOKS = [
+    { src: 'drop/studio-noir/sample-living.jpg', label: 'Living, sleeping, dining' },
+    { src: 'drop/studio-noir/sample-plan.jpg', label: 'The whole studio, planned' },
+    { src: 'drop/studio-noir/sample-kitchenette.jpg', label: 'Kitchenette and bed' }
+  ];
+  var LOOK_HOLD = 4200;
   var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js';
   var STORE_KEY = 'redflag:the-drop:studio-noir:stage';
   var GL_PARAM = (/[?&]gl=(\w+)/.exec(location.search) || [])[1];   // "off" / "force" — for testing only
@@ -434,6 +473,37 @@ h1 span:nth-child(3){transition-delay:140ms}
     });
   });
 
+  /* sample looks for "The room" */
+  var looks = [], looksSettled = !ROOM_LOOKS.length, lookIdx = 0, lookTimer = 0, lookAuto = true, lookTx = null;
+  var looksEl = document.getElementById('looks'), looksLabel = document.getElementById('looks-label'), looksDots = document.getElementById('looks-dots');
+  Promise.all(ROOM_LOOKS.map(function (l) {
+    var img = new Image();
+    img.decoding = 'async';
+    img.src = l.src;
+    return (img.decode ? img.decode() : Promise.reject()).then(function () { return { img: img, label: l.label }; }, function () { return null; });
+  })).then(function (res) {
+    res.filter(Boolean).forEach(function (r, i) {
+      var el = r.img.cloneNode();
+      el.alt = '';
+      el.className = 'look';
+      scenes.room.media.appendChild(el);
+      looks.push({ name: 'room', sample: true, label: r.label, src: r.img, el: el });
+      var dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'dot';
+      dot.setAttribute('aria-label', 'Sample ' + (i + 1) + ': ' + r.label);
+      dot.addEventListener('click', function () { lookAuto = false; clearTimeout(lookTimer); lookTo(i); });
+      looksDots.appendChild(dot);
+    });
+    looks.forEach(function (l) { l.of = looks.length; });
+    looksSettled = true;
+    if (current === scenes.room && looks.length) { setCssLook(0); startLooks(); }
+    enable(scenes.room);
+    bootGL();
+  });
+  function hasLooks() { return looks.length > 0; }
+  function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled); }
+
   // Resolves with the element once it can be shown without a blank frame, or null if the slot has no usable media.
   function prime(s) {
     var el = s.media.querySelector('img,video');
@@ -470,7 +540,7 @@ h1 span:nth-child(3){transition-delay:140ms}
     (img.decode ? img.decode() : Promise.reject()).then(function () {
       standinImg = img;
       order.forEach(function (s) {
-        var old = s.media.querySelector('img,video');
+        var old = s.media.querySelector(':scope > img:not(.look), :scope > video');
         if (old) old.parentNode.removeChild(old);
         var el = img.cloneNode();
         el.alt = '';
@@ -488,6 +558,7 @@ h1 span:nth-child(3){transition-delay:140ms}
   }
 
   function enable(s) {
+    if (!isReady(s)) return;
     buttons.forEach(function (b) {
       if (b.getAttribute('data-scene') !== s.name) return;
       b.classList.remove('pending');
@@ -497,10 +568,12 @@ h1 span:nth-child(3){transition-delay:140ms}
   }
 
   function play(s) {
+    if (!s.media) return;
     var v = s.media.querySelector('video');
     if (v && !reduceMQ.matches && !document.hidden) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
   }
   function pause(s) {
+    if (!s.media) return;
     var v = s.media.querySelector('video');
     if (v) v.pause();
   }
@@ -566,10 +639,59 @@ h1 span:nth-child(3){transition-delay:140ms}
   }
 
   function show(name, instant) {
-    var s = scenes[name];
-    if (gl) { play(s); gl.go(s, instant); cssSet(s); return; }
-    if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); return; }
-    go(s, name === 'base' ? 'rev' : 'fwd');
+    var s = scenes[name], withLooks = name === 'room' && hasLooks();
+    stopLooks();
+    if (withLooks) { lookIdx = 0; setCssLook(0); }
+    if (gl) { play(s); gl.go(withLooks ? looks[0] : s, instant); cssSet(s); }
+    else if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); }
+    else go(s, name === 'base' ? 'rev' : 'fwd');
+    if (withLooks) startLooks();
+  }
+
+  /* The room: step through the sample looks with the same dissolve (WebGL) or a bloom from the light (CSS) */
+  function setCssLook(k) {
+    if (lookTx) { lookTx.cancel(); lookTx = null; }
+    looks.forEach(function (l, i) { l.el.classList.toggle('on', i === k); l.el.classList.remove('top'); });
+  }
+  function labelLook(k) {
+    looksLabel.textContent = looks[k].label;
+    [].forEach.call(looksDots.children, function (d, i) { d.setAttribute('aria-current', i === k ? 'true' : 'false'); });
+  }
+  function lookTo(k) {
+    if (k === lookIdx || current !== scenes.room) return;
+    var prev = looks[lookIdx], next = looks[k];
+    lookIdx = k;
+    labelLook(k);
+    if (gl) { gl.go(next); setCssLook(k); return; }
+    if (lookTx) { lookTx.cancel(); lookTx = null; }
+    looks.forEach(function (l) { if (l !== prev && l !== next) l.el.classList.remove('on', 'top'); });
+    next.el.classList.add('on', 'top');
+    var reduced = reduceMQ.matches;
+    var a = reduced
+      ? next.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCED_FADE, easing: 'ease-out' })
+      : next.el.animate([{ clipPath: 'circle(0% at 50% 14%)' }, { clipPath: 'circle(150% at 50% 14%)' }], { duration: DUR, easing: EASE });
+    lookTx = a;
+    a.onfinish = function () {
+      if (lookTx !== a) return;
+      lookTx = null;
+      prev.el.classList.remove('on');
+      next.el.classList.remove('top');
+    };
+  }
+  function scheduleLook() {
+    clearTimeout(lookTimer);
+    if (!lookAuto || reduceMQ.matches || document.hidden || looks.length < 2) return;
+    lookTimer = setTimeout(function () { lookTo((lookIdx + 1) % looks.length); scheduleLook(); }, LOOK_HOLD);
+  }
+  function startLooks() {
+    lookAuto = true;
+    labelLook(lookIdx);
+    looksEl.classList.add('on');
+    scheduleLook();
+  }
+  function stopLooks() {
+    clearTimeout(lookTimer);
+    looksEl.classList.remove('on');
   }
 
   /* WebGL path */
@@ -587,7 +709,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 
   function bootGL() {
     if (gl || glDead) return;
-    if (!order.every(function (s) { return s.ready && s.src; })) return;
+    if (!looksSettled || !order.every(function (s) { return s.ready && s.src; })) return;
     if (!webglOK()) { glDead = true; return; }
     var go3 = function () {
       if (gl || glDead) return;
@@ -758,8 +880,9 @@ h1 span:nth-child(3){transition-delay:140ms}
       var e = s.src;
       return e.tagName === 'VIDEO' ? (e.videoWidth / e.videoHeight || 1.5) : (e.naturalWidth / e.naturalHeight || 1.5);
     }
-    function gradeOf(s) { var g = mode === 'standin' ? GRADE[s.name] : [1, 1, 1, 0]; return new T.Vector4(g[0], g[1], g[2], g[3]); }
+    function gradeOf(s) { var g = mode === 'standin' && !s.sample ? GRADE[s.name] : [1, 1, 1, 0]; return new T.Vector4(g[0], g[1], g[2], g[3]); }
     order.forEach(texOf);   // upload every texture before the canvas is ever shown
+    looks.forEach(texOf);
 
     var u = {
       tFrom: { value: null }, tTo: { value: null }, tNoise: { value: noise },
@@ -770,7 +893,7 @@ h1 span:nth-child(3){transition-delay:140ms}
     var mesh = new T.Mesh(new T.PlaneGeometry(1, 1), new T.ShaderMaterial({ uniforms: u, vertexShader: VERT, fragmentShader: FRAG }));
     scene.add(mesh);
 
-    var cur = current, gtx = null, baseW = 1, baseH = 1;
+    var cur = current === scenes.room && hasLooks() ? looks[lookIdx] : current, gtx = null, baseW = 1, baseH = 1;
     function bind(a, b) {
       u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a);
       u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b);
@@ -911,8 +1034,8 @@ h1 span:nth-child(3){transition-delay:140ms}
   document.addEventListener('visibilitychange', function () {
     var hidden = document.hidden;
     stage.classList.toggle('paused', hidden);
-    if (hidden) { if (gl) gl.stop(); if (current) pause(current); }
-    else { if (gl) gl.start(); if (current) play(current); }
+    if (hidden) { if (gl) gl.stop(); if (current) pause(current); clearTimeout(lookTimer); }
+    else { if (gl) gl.start(); if (current) play(current); if (current === scenes.room && looksEl.classList.contains('on')) scheduleLook(); }
   });
 
   /* ---- where they left off ---- */
@@ -941,7 +1064,7 @@ h1 span:nth-child(3){transition-delay:140ms}
     stage.classList.remove('picked', 'title-hidden');
     caption.textContent = '';
     buttons.forEach(function (b) {
-      var ready = scenes[b.getAttribute('data-scene')].ready;
+      var ready = isReady(scenes[b.getAttribute('data-scene')]);
       b.classList.remove('on');
       b.classList.toggle('pending', !ready);
       b.disabled = !ready;
@@ -975,8 +1098,9 @@ h1 span:nth-child(3){transition-delay:140ms}
     select(savedBtn, true);
     requestAnimationFrame(function () { requestAnimationFrame(function () { stage.classList.remove('instant'); }); });
     note.classList.add('show');
+    stage.classList.add('resuming');
     live.textContent = 'Picking up where you left off. ' + savedBtn.getAttribute('data-label') + ' shown.';
-    setTimeout(function () { note.classList.remove('show'); }, 3800);
+    setTimeout(function () { note.classList.remove('show'); stage.classList.remove('resuming'); }, 3800);
   }
 
   /* ---- links: put your real ones here ---- */
