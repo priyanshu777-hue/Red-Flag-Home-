@@ -8,7 +8,7 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   box-sizing:border-box;
@@ -99,6 +99,24 @@ h1 span{display:inline-block;transition:opacity 700ms var(--ease),filter 700ms v
 h1 span:nth-child(2){transition-delay:70ms}
 h1 span:nth-child(3){transition-delay:140ms}
 .stage.title-hidden h1 span{opacity:0;filter:blur(12px);transform:translateY(-10px)}
+h1 .w-the{font-style:italic;margin-right:.04em}
+.tagline{margin:14px 0 0;font:italic 400 clamp(18px,2vw,26px)/1.25 'Instrument Serif',serif;letter-spacing:-.005em;
+  color:rgba(255,255,255,.88);text-shadow:0 1px 10px rgb(0 0 0 / .35);
+  transition:opacity 600ms var(--ease) 60ms,filter 600ms var(--ease) 60ms,transform 600ms var(--ease) 60ms}
+.tw{display:inline-block}
+.stage.title-hidden .tagline{opacity:0;filter:blur(8px);transform:translateY(-8px)}
+
+/* entrance, once: letters rise out of a blur, then warm light passes through them; the tagline settles word by word */
+.js .stage:not(.intro) h1 .ch,.js .stage:not(.intro) .tw,.js .stage:not(.intro) .eyebrow{opacity:0}
+@keyframes drop-rise{0%{opacity:0;transform:translateY(.42em);filter:blur(12px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
+@keyframes drop-glint{0%,100%{color:#fff}45%{color:#ffd9ab;text-shadow:0 0 22px rgb(255 186 112 / .6),0 2px 14px rgb(0 0 0 / .3)}}
+@keyframes tag-rise{from{opacity:0;transform:translateY(.5em);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes eyebrow-in{from{opacity:0}to{opacity:1}}
+.stage.intro h1 .ch{animation:drop-rise 1100ms var(--ease) backwards,drop-glint 1300ms ease-in-out backwards;
+  animation-delay:calc(var(--i) * 60ms + 80ms),calc(var(--i) * 70ms + 1000ms)}
+.stage.intro .tw{animation:tag-rise 800ms var(--ease) backwards;animation-delay:calc(var(--i) * 45ms + 650ms)}
+.stage.intro .eyebrow{animation:eyebrow-in 900ms var(--ease) backwards}
+.stage.title-hidden h1 .ch,.stage.title-hidden .tw,.stage.instant-title h1 .ch,.stage.instant-title .tw,.stage.instant-title .eyebrow{animation:none}
 .sub{width:min(600px,100%);margin:16px auto 0;
   font-size:clamp(13px,1.2vw,16px);line-height:1.5;letter-spacing:-.02em;color:rgba(255,255,255,.8);
   text-shadow:0 1px 8px rgb(0 0 0 / .3);
@@ -227,7 +245,8 @@ h1 span:nth-child(3){transition-delay:140ms}
   .terms{font-size:11px}
 }
 @media (prefers-reduced-motion:reduce){
-  .capsule,.track,.cell,h1 span,.caption,.btn,.sub{transition-duration:1ms!important;transition-delay:0ms!important}
+  .capsule,.track,.cell,h1 span,.caption,.btn,.sub,.tagline{transition-duration:1ms!important;transition-delay:0ms!important}
+  .stage.intro h1 .ch,.stage.intro .tw,.stage.intro .eyebrow{animation:none}
   h1 span{filter:none!important}
 }
 @media (prefers-reduced-motion:reduce){
@@ -256,7 +275,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 
 /* returning visitor: restore without replaying the collapse choreography */
 .stage.instant .controller,.stage.instant .controller *,.stage.instant .controller *::before,.stage.instant .controller *::after,
-.stage.instant h1 span,.stage.instant .sub,.stage.instant .caption{transition:none!important;animation:none!important}
+.stage.instant h1 span,.stage.instant .sub,.stage.instant .caption,.stage.instant .tagline,.stage.instant .tagline *,.stage.instant .eyebrow{transition:none!important;animation:none!important}
 /* sits in the gap above the controller, which is empty while a stage is shown */
 .resume{--gap:clamp(28px,5vh,56px);position:relative;z-index:20;height:0;flex:none}
 .resume span{position:absolute;left:0;right:0;top:calc((var(--gap) - 18px) / 2);text-align:center;
@@ -269,7 +288,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 /* Short screens (phones in portrait with browser chrome, phones in landscape): everything still fits one screen, no scroll.
    The price, CTAs, pill and controller keep their sizes; only the space around them tightens.
    When a stage is shown the headline is invisible, so its caption takes the headline's slot. */
-@media (max-height:600px), (max-width:700px) and (max-height:800px){
+@media (max-height:600px), (max-width:700px) and (max-height:830px){
   header{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:8px}
   .stage{display:grid;grid-template-columns:100%;grid-template-rows:auto auto auto auto 1fr;
     padding-top:calc(56px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
@@ -281,15 +300,17 @@ h1 span:nth-child(3){transition-delay:140ms}
   .stage.picked .caption{grid-area:1 / 1;align-self:end}
   .foot{grid-area:5 / 1;align-self:end;margin:0 auto;padding-top:12px;gap:8px}
   .eyebrow,.sub{display:none}
-  h1{font-size:clamp(34px,5.4vw,44px)}
+  h1{font-size:clamp(30px,5vw,40px)}
+  .tagline{margin-top:4px;font-size:15px;line-height:18px}
 }
-@media (max-width:700px) and (max-height:800px){.hero{min-height:52px}}
+@media (max-width:700px) and (max-height:830px){.hero{min-height:52px}}
 /* phones in landscape */
 @media (max-height:420px){
   header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px}
   .stage{padding-top:calc(50px + env(safe-area-inset-top,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
   h1{font-size:26px}
-  .hero{min-height:34px}
+  .hero{min-height:34px;flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:center;column-gap:14px}
+  .tagline{margin:0}
   .foot{padding-top:6px;gap:6px}
 }
 
@@ -315,8 +336,8 @@ h1 span:nth-child(3){transition-delay:140ms}
 @media (max-width:700px){.looks{--gap:clamp(22px,4vh,40px)}}
 @media (max-width:360px){.looks-dots{display:none}}
 @media (max-height:700px){.looks{--gap:22px}.looks-in{height:18px;top:calc((var(--gap) - 18px) / 2)}.looks-dots{display:none}}
-@media (max-height:600px), (max-width:700px) and (max-height:800px){.looks{grid-area:2 / 1;--gap:16px}.looks-in{font-size:11px;height:16px;top:0}.looks-dots{display:none}}
-@media (max-width:360px) and (max-height:800px){.stage{padding-left:12px;padding-right:12px}}
+@media (max-height:600px), (max-width:700px) and (max-height:830px){.looks{grid-area:2 / 1;--gap:16px}.looks-in{font-size:11px;height:16px;top:0}.looks-dots{display:none}}
+@media (max-width:360px) and (max-height:830px){.stage{padding-left:12px;padding-right:12px}}
 </style>
 </head>
 <body>
@@ -337,9 +358,10 @@ h1 span:nth-child(3){transition-delay:140ms}
   <div class="scrim"></div>
 
   <div class="hero">
-    <div class="eyebrow">Red Flag Homes Network · The Drop</div>
-    <h1><span>Studio</span> <span>·</span> <span>Noir</span></h1>
-    <p class="sub">One room. One delivery. Guest-ready in fifteen days. 85+ pieces sourced, delivered, installed, styled and photographed — you unlock the door once and we hand it back finished.</p>
+    <div class="eyebrow">Red Flag Homes Network · Studio Noir</div>
+    <h1 aria-label="The Drop"><span class="w w-the" aria-hidden="true"><span class="ch" style="--i:0">T</span><span class="ch" style="--i:1">h</span><span class="ch" style="--i:2">e</span></span> <span class="w" aria-hidden="true"><span class="ch" style="--i:3">D</span><span class="ch" style="--i:4">r</span><span class="ch" style="--i:5">o</span><span class="ch" style="--i:6">p</span></span></h1>
+    <p class="tagline"><span class="tw" style="--i:0">From</span> <span class="tw" style="--i:1">bare</span> <span class="tw" style="--i:2">walls</span> <span class="tw" style="--i:3">to</span> <span class="tw" style="--i:4">booked</span> <span class="tw" style="--i:5">—</span> <span class="tw" style="--i:6">in</span> <span class="tw" style="--i:7">fifteen</span> <span class="tw" style="--i:8">days.</span></p>
+    <p class="sub">One room. One delivery. 85+ pieces sourced, delivered, installed, styled and photographed — you unlock the door once and we hand it back finished.</p>
   </div>
 
   <div class="resume" id="resume" aria-hidden="true"><span>Picking up where you left off</span></div>
@@ -1160,6 +1182,12 @@ h1 span:nth-child(3){transition-delay:140ms}
     live.textContent = 'Picking up where you left off. ' + savedBtn.getAttribute('data-label') + ' shown.';
     setTimeout(function () { note.classList.remove('show'); stage.classList.remove('resuming'); }, 3800);
   }
+
+  (function () {
+    var go = function () { if (!stage.classList.contains('picked')) stage.classList.add('intro'); else stage.classList.add('intro', 'instant-title'); };
+    var fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(go, go);
+  })();
 
   /* ---- links: put your real ones here ---- */
   var RAZORPAY = '';   // e.g. 'https://rzp.io/l/xxxxxxxx'
