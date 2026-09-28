@@ -245,7 +245,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 #gl{position:absolute;inset:0;z-index:0;width:100%;height:100%;display:block;pointer-events:none;
   opacity:0;transition:opacity 500ms var(--ease)}
 .stage.gl-on #gl{opacity:1}
-.stage.gl-live .scene{visibility:hidden;animation-play-state:paused}
+.stage.gl-live .scene{animation-play-state:paused}   /* kept visible: browsers may pause a video they think is hidden */
 .stage.paused .scene{animation-play-state:paused}
 /* stand-in photo, graded per stage, until the five real plates exist */
 .m-base img.standin{filter:grayscale(1) brightness(1.45) contrast(.62)}
@@ -295,6 +295,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 
 /* The room: the three sample looks play inside the scene; this line names the one on screen */
 .media img.look{opacity:0;visibility:hidden;z-index:1;transition:none}
+.js .media video.hero-video{z-index:1;opacity:1;transition:none}
 .media img.look.on{opacity:1;visibility:visible}
 .media img.look.top{z-index:2}
 .looks{--gap:clamp(28px,5vh,56px);position:relative;z-index:21;height:0;flex:none}
@@ -435,6 +436,8 @@ h1 span:nth-child(3){transition-delay:140ms}
     { src: 'drop/studio-noir/sample-kitchenette.jpg', label: 'Kitchenette and bed' }
   ];
   var LOOK_HOLD = 4200;
+  // Phone hero: this footage plays behind the plain room on narrow screens; the stages keep their photos.
+  var HERO_VIDEO = { src: 'drop/studio-noir/hero-mobile.mp4', poster: 'drop/studio-noir/hero-mobile-poster.jpg', media: '(max-width: 700px)' };
   var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js';
   var STORE_KEY = 'redflag:the-drop:studio-noir:stage';
   var GL_PARAM = (/[?&]gl=(\w+)/.exec(location.search) || [])[1];   // "off" / "force" — for testing only
@@ -502,6 +505,52 @@ h1 span:nth-child(3){transition-delay:140ms}
     bootGL();
   });
   function hasLooks() { return looks.length > 0; }
+
+  /* phone hero video: the poster stands in until the first frame is decoded, so nothing ever shows blank */
+  var hero = null, heroSettled = true, heroPauseT = 0;
+  if (HERO_VIDEO && window.matchMedia(HERO_VIDEO.media).matches) {
+    heroSettled = false;
+    var heroPoster = new Image(), heroVid = document.createElement('video');
+    heroPoster.decoding = 'async';
+    heroPoster.src = HERO_VIDEO.poster;
+    heroVid.className = 'hero-video';
+    heroVid.muted = true; heroVid.defaultMuted = true; heroVid.loop = true; heroVid.playsInline = true;
+    heroVid.setAttribute('muted', ''); heroVid.setAttribute('playsinline', ''); heroVid.setAttribute('aria-hidden', 'true');
+    heroVid.preload = 'auto';
+    heroVid.poster = HERO_VIDEO.poster;
+    heroVid.src = HERO_VIDEO.src;
+    scenes.base.media.appendChild(heroVid);
+    hero = { name: 'base', sample: true, media: null, src: null, video: heroVid, ready: false };
+    (heroPoster.decode ? heroPoster.decode() : Promise.reject()).then(function () {
+      hero.src = heroPoster;
+      hero.ready = true;
+    }, function () {
+      heroVid.parentNode.removeChild(heroVid);
+      hero = null;
+    }).then(function () {
+      heroSettled = true;
+      if (current === scenes.base) heroPlay(true);
+      bootGL();
+    });
+    heroVid.addEventListener('loadeddata', function () {
+      if (!hero) return;
+      hero.src = heroVid;
+      if (gl && gl.refresh) gl.refresh();
+    }, { once: true });
+  }
+  function heroPlay(on) {
+    if (!hero) return;
+    clearTimeout(heroPauseT);
+    var v = hero.video;
+    if (on && !reduceMQ.matches && !document.hidden) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    else v.pause();
+  }
+  // Which picture the WebGL scene shows for a stage: the sample look, the phone video, or the stage photo.
+  function glScene(name) {
+    if (name === 'room' && hasLooks()) return looks[lookIdx];
+    if (name === 'base' && hero && hero.ready) return hero;
+    return scenes[name];
+  }
   function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled); }
 
   // Resolves with the element once it can be shown without a blank frame, or null if the slot has no usable media.
@@ -540,7 +589,7 @@ h1 span:nth-child(3){transition-delay:140ms}
     (img.decode ? img.decode() : Promise.reject()).then(function () {
       standinImg = img;
       order.forEach(function (s) {
-        var old = s.media.querySelector(':scope > img:not(.look), :scope > video');
+        var old = s.media.querySelector(':scope > img:not(.look), :scope > video:not(.hero-video)');
         if (old) old.parentNode.removeChild(old);
         var el = img.cloneNode();
         el.alt = '';
@@ -642,10 +691,12 @@ h1 span:nth-child(3){transition-delay:140ms}
     var s = scenes[name], withLooks = name === 'room' && hasLooks();
     stopLooks();
     if (withLooks) { lookIdx = 0; setCssLook(0); }
-    if (gl) { play(s); gl.go(withLooks ? looks[0] : s, instant); cssSet(s); }
+    if (gl) { play(s); gl.go(glScene(name), instant); cssSet(s); }
     else if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); }
     else go(s, name === 'base' ? 'rev' : 'fwd');
     if (withLooks) startLooks();
+    if (name === 'base') heroPlay(true);
+    else if (hero) heroPauseT = setTimeout(function () { if (current !== scenes.base) heroPlay(false); }, DUR + 150);   // keep it moving while it dissolves away
   }
 
   /* The room: step through the sample looks with the same dissolve (WebGL) or a bloom from the light (CSS) */
@@ -709,7 +760,7 @@ h1 span:nth-child(3){transition-delay:140ms}
 
   function bootGL() {
     if (gl || glDead) return;
-    if (!looksSettled || !order.every(function (s) { return s.ready && s.src; })) return;
+    if (!looksSettled || !heroSettled || !order.every(function (s) { return s.ready && s.src; })) return;
     if (!webglOK()) { glDead = true; return; }
     var go3 = function () {
       if (gl || glDead) return;
@@ -883,6 +934,7 @@ h1 span:nth-child(3){transition-delay:140ms}
     function gradeOf(s) { var g = mode === 'standin' && !s.sample ? GRADE[s.name] : [1, 1, 1, 0]; return new T.Vector4(g[0], g[1], g[2], g[3]); }
     order.forEach(texOf);   // upload every texture before the canvas is ever shown
     looks.forEach(texOf);
+    if (hero && hero.ready) texOf(hero);
 
     var u = {
       tFrom: { value: null }, tTo: { value: null }, tNoise: { value: noise },
@@ -893,12 +945,13 @@ h1 span:nth-child(3){transition-delay:140ms}
     var mesh = new T.Mesh(new T.PlaneGeometry(1, 1), new T.ShaderMaterial({ uniforms: u, vertexShader: VERT, fragmentShader: FRAG }));
     scene.add(mesh);
 
-    var cur = current === scenes.room && hasLooks() ? looks[lookIdx] : current, gtx = null, baseW = 1, baseH = 1;
+    var cur = glScene(current.name), gtx = null, baseW = 1, baseH = 1;
     function bind(a, b) {
       u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a);
       u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b);
     }
     bind(cur, cur);
+    view.refresh = function () { if (!gtx) bind(cur, cur); };   // e.g. the phone video's first frame replacing its poster
 
     function finish() {
       var keep = gtx.target === 1 ? gtx.to : gtx.from, drop = keep === gtx.to ? gtx.from : gtx.to;
@@ -1034,9 +1087,14 @@ h1 span:nth-child(3){transition-delay:140ms}
   document.addEventListener('visibilitychange', function () {
     var hidden = document.hidden;
     stage.classList.toggle('paused', hidden);
-    if (hidden) { if (gl) gl.stop(); if (current) pause(current); clearTimeout(lookTimer); }
-    else { if (gl) gl.start(); if (current) play(current); if (current === scenes.room && looksEl.classList.contains('on')) scheduleLook(); }
+    if (hidden) { if (gl) gl.stop(); if (current) pause(current); clearTimeout(lookTimer); heroPlay(false); }
+    else { if (gl) gl.start(); if (current) play(current); if (current === scenes.room && looksEl.classList.contains('on')) scheduleLook(); if (current === scenes.base) heroPlay(true); }
   });
+  var onMotionPref = function () {
+    if (current === scenes.base) heroPlay(true);
+    if (current === scenes.room && looksEl.classList.contains('on')) scheduleLook();
+  };
+  if (reduceMQ.addEventListener) reduceMQ.addEventListener('change', onMotionPref); else if (reduceMQ.addListener) reduceMQ.addListener(onMotionPref);
 
   /* ---- where they left off ---- */
   function store(v) { try { window.localStorage.setItem(STORE_KEY, v); } catch (e) {} }
