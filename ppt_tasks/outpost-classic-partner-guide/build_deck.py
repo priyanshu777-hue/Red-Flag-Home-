@@ -246,7 +246,7 @@ def build():
         d.box(s, x, 3.2, cw, 0.3, "ink").name = "static-tag"
         T(s, x + 0.15, 3.25, cw - 0.3, 0.25, t, size=9, color="white", bold=True, spacing=150, caps=True)
     rows = [("Franchise fee, one time", "₹59,999", None),
-            ("Setup & procuring, up to 2 keys", "₹1,11,111", None),
+            ("Setup & procuring, up to 3 keys", "₹1,11,111", None),
             ("Programme fee", "₹1,71,110", None),
             ("Rent and deposit", "None", "Paid by you to your landlord"),
             ("Electricity, water, internet", "You", None),
@@ -266,13 +266,13 @@ def build():
         else:
             T(s, xa, y + 0.09, W - M - xa, 0.3, a, size=11, color="ink", align="center")
     d.rule(s, M, y0 + len(rows) * rh, W - 2 * M)
-    T(s, M, 6.62, 11.5, 0.3, "All prices plus applicable GST. Setup covers up to 2 keys; each extra key ₹45,000. "
+    T(s, M, 6.62, 11.5, 0.3, "All prices plus applicable GST. Setup covers up to 3 keys; each extra key ₹45,000. "
       "Furniture for an unfurnished property is quoted separately, itemised, at cost.", size=8.5, color="muted")
 
     # 5 — The price -----------------------------------------------------------------------------
     s = d.slide()
     d.header(s, "The price", "One fee. Then 8% of what it books.", size=36)
-    eq = [("Franchise fee", "₹59,999", "one time"), ("Setup & procuring", "₹1,11,111", "up to 2 keys"),
+    eq = [("Franchise fee", "₹59,999", "one time"), ("Setup & procuring", "₹1,11,111", "up to 3 keys"),
           ("Programme fee", "₹1,71,110", "one time, plus GST")]
     for i, (k, v, sub) in enumerate(eq):
         y = 2.45 + i * 1.22
@@ -293,7 +293,7 @@ def build():
     d.rule(s, px + 0.35, 4.6, tot)
     T(s, px + 0.35, 4.78, tot, 0.4, "Founding partners keep 8% for life.", size=15, font=SERIF, color="ink",
       italic=True)
-    T(s, px + 0.35, 5.2, tot, 0.5, "Setup covers up to 2 keys; each extra key ₹45,000.", size=10.5,
+    T(s, px + 0.35, 5.2, tot, 0.5, "Setup covers up to 3 keys; each extra key ₹45,000.", size=10.5,
       color="muted")
     d.box(s, M, 6.18, W - 2 * M, 0.62, "ink")
     T(s, M + 0.35, 6.33, 11, 0.4, "You pay nothing until your property passes assessment.  We look first, then you decide.",
@@ -353,11 +353,10 @@ def build():
     d.veil(s, 35)
     d.mask(s, 0, 0, 8.5, H, "right")
     d.logo(s, W - M - 0.55, 0.32, 0.55)
-    label(s, M, 1.4, 7, "Setup & procuring", color="brass_lt")
-    H1(s, M, 1.85, 8, 1.6, "₹1,11,111", size=110, leading=0.85)
-    H1(s, M, 3.6, 6.6, 1.6, "What it actually buys — sourced, delivered, installed and photographed.", size=28,
-       leading=1.05)
-    T(s, M, 5.0, 5.5, 0.5, "Plus the launch.", size=14, color="brass_lt", bold=True)
+    label(s, M, 1.4, 7, "What your ₹1,11,111 actually buys", color="brass_lt")
+    H1(s, M, 1.8, 7, 2.6, "90+", size=180, leading=0.85)
+    H1(s, M, 4.45, 6.6, 1.0, "pieces — sourced, delivered, installed and photographed.", size=28, leading=1.05)
+    T(s, M, 5.65, 5.5, 0.5, "Plus the launch.", size=14, color="brass_lt", bold=True)
 
     # 9 / 10 — The kit ------------------------------------------------------------------------------
     kit = [
@@ -382,7 +381,7 @@ def build():
                                                        "Branded welcome card and printed house guide"]),
          ("mountain_bed", "The work, not just the things",
           ["Design plan, sourcing, delivery and a full installation day", "Deep clean and styling before the shoot",
-           "Professional photo and video shoot, edited images", "Listings on Airbnb, Booking.com and your direct page",
+           "Professional photo and video shoot, 25+ edited images", "Listings on Airbnb, Booking.com and your direct page",
            "AI pricing, creator launch, guidebook and house rules"])],
     ]
     for page, cols in enumerate(kit):
@@ -438,7 +437,7 @@ def build():
             ("Repairs above ₹2,000 per incident", "You — and we ask before we spend"),
             ("Major appliance replacement (AC, geyser, fridge)", "You"),
             ("Furniture for an unfurnished property", "You — quoted separately, itemised, at cost"),
-            ("Keys beyond the first two", "You — ₹45,000 per extra key"),
+            ("Keys beyond the first three", "You — ₹45,000 per extra key"),
             ("Building and contents insurance", "You"),
             ("Cleaning, linen, consumables, minor repairs", "Deducted from booking revenue at cost")]
     label(s, M, 2.3, 4, "Item", color="muted")
@@ -539,7 +538,7 @@ def build():
     opts = ["Do it yourself", "A co-host", "Outpost Classic"]
     cmp_rows = [("Commission", "None", "15–20%", "8%, min ₹4,999/month"),
                 ("Joining fee", "None", "₹20,000–50,000 typical", "₹59,999 one time"),
-                ("Setup and design", "Yours", "Yours", "₹1,11,111 · design, shoot, launch"),
+                ("Setup and design", "Yours", "Yours", "₹1,11,111 · 90+ pieces, shoot, launch"),
                 ("Cleaning", "You arrange and pay", "Usually you", "We arrange — at cost from bookings"),
                 ("Repairs", "You", "Usually you", "Handled to ₹2,000 per incident"),
                 ("Guests at 2am", "You", "Rarely", "Us, 24/7"),
@@ -635,7 +634,7 @@ def build():
     # 21 / 22 — FAQ --------------------------------------------------------------------------------
     faq = [
         ("What is Outpost Classic?", "A programme where Red Flag designs, brands, launches and runs your short-stay property end to end. You pay a one-time programme fee and 8% of booking revenue."),
-        ("What does it cost?", "₹59,999 franchise fee plus ₹1,11,111 setup, one time — ₹1,71,110 for up to two keys, plus GST. Extra keys ₹45,000 each. Commission 8%, min ₹4,999 a month."),
+        ("What does it cost?", "₹59,999 franchise fee plus ₹1,11,111 setup, one time — ₹1,71,110 for up to three keys, plus GST. Extra keys ₹45,000 each. Commission 8%, min ₹4,999 a month."),
         ("When do I pay?", "After your property passes assessment and you sign. Nothing before that. The free assessment carries no obligation."),
         ("I already own a property. What do I pay?", "The programme fee, electricity and utilities. No rent, no deposit."),
         ("I don’t own a property. Can I still join?", "Yes. We help you find and assess a high-demand property before you sign a lease. You pay the programme fee, and rent and deposit to your landlord."),
