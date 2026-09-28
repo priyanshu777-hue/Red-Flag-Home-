@@ -286,19 +286,15 @@ def build():
             d.rule(s, M + 0.6, y + 1.1, 5.6, "ink", 0.02)
     px, pw = 7.35, W - M - 7.35
     d.box(s, px, 2.35, pw, 3.55, "paper")
-    label(s, px + 0.35, 2.6, 4, "Setup Flex")
-    H1(s, px + 0.35, 2.9, pw - 0.7, 0.6, "Start with less at signing.", size=22)
     tot = pw - 0.7
-    a_w = tot * 115555 / 171110
-    d.box(s, px + 0.35, 3.75, a_w, 0.42, "ink")
-    d.box(s, px + 0.35 + a_w + 0.04, 3.75, tot - a_w - 0.04, 0.42, "brass")
-    T(s, px + 0.5, 3.84, a_w - 0.2, 0.3, "₹1,15,555 at signing", size=10.5, color="white", bold=True)
-    T(s, px + 0.35 + a_w + 0.15, 3.84, 1.7, 0.3, "₹55,556", size=10.5, color="white", bold=True)
-    T(s, px + 0.35, 4.35, tot, 0.9, "The balance comes from your first six payouts — at no extra charge.",
-      size=12, color="body", leading=1.35)
-    d.rule(s, px + 0.35, 5.0, tot)
-    label(s, px + 0.35, 5.15, 4, "Commission", color="muted")
-    T(s, px + 0.35, 5.42, tot, 0.4, "8% of booking revenue, min ₹4,999 a month", size=13, color="ink", bold=True)
+    label(s, px + 0.35, 2.6, 4, "Then, every month")
+    H1(s, px + 0.35, 2.85, tot, 1.2, "8%", size=80, color="ink", leading=0.9)
+    T(s, px + 0.35, 4.0, tot, 0.4, "of booking revenue, min ₹4,999 a month", size=13, color="ink", bold=True)
+    d.rule(s, px + 0.35, 4.6, tot)
+    T(s, px + 0.35, 4.78, tot, 0.4, "Founding partners keep 8% for life.", size=15, font=SERIF, color="ink",
+      italic=True)
+    T(s, px + 0.35, 5.2, tot, 0.5, "Setup covers up to 2 keys; each extra key ₹45,000.", size=10.5,
+      color="muted")
     d.box(s, M, 6.18, W - 2 * M, 0.62, "ink")
     T(s, M + 0.35, 6.33, 11, 0.4, "You pay nothing until your property passes assessment.  We look first, then you decide.",
       size=13, color="white", bold=True)
@@ -357,23 +353,24 @@ def build():
     d.veil(s, 35)
     d.mask(s, 0, 0, 8.5, H, "right")
     d.logo(s, W - M - 0.55, 0.32, 0.55)
-    label(s, M, 1.4, 7, "What your ₹1,11,111 actually buys", color="brass_lt")
-    H1(s, M, 1.8, 7, 2.6, "90+", size=180, leading=0.85)
-    H1(s, M, 4.45, 6.6, 1.0, "pieces — sourced, delivered, installed and photographed.", size=28, leading=1.05)
-    T(s, M, 5.65, 5.5, 0.5, "Plus the launch.", size=14, color="brass_lt", bold=True)
+    label(s, M, 1.4, 7, "Setup & procuring", color="brass_lt")
+    H1(s, M, 1.85, 8, 1.6, "₹1,11,111", size=110, leading=0.85)
+    H1(s, M, 3.6, 6.6, 1.6, "What it actually buys — sourced, delivered, installed and photographed.", size=28,
+       leading=1.05)
+    T(s, M, 5.0, 5.5, 0.5, "Plus the launch.", size=14, color="brass_lt", bold=True)
 
     # 9 / 10 — The kit ------------------------------------------------------------------------------
     kit = [
-        [("lamp", "Lighting", ["Pendant lights, bedside lamps, a floor lamp and plug-in wall sconces",
+        [("lamp", "Lighting", ["Pendant lights, bedside lamps, floor lamp and plug-in wall sconces",
                                "Warm 2700K bulbs in every fitting, dimmable where possible",
                                "Balcony or headboard string lights, hallway and bathroom night lights"]),
          ("linen", "Bedding & bath, hotel standard",
-          ["Two full sets of white cotton linen per bedroom", "Mattress and pillow protectors; four pillows per bed",
-           "Two sets of bath towels, hand towels and mats per bathroom", "Waffle robes, slippers, laundry bag, hamper"]),
-         ("styling", "Soft styling", ["Six designer cushion covers with inserts, two textured throws",
+          ["White cotton linen for every bedroom", "Mattress and pillow protectors; soft and firm pillows",
+           "Bath towels, hand towels and bath mats", "Waffle robes, slippers, laundry bag, hamper"]),
+         ("styling", "Soft styling", ["Designer cushion covers with inserts, textured throws",
                                       "Blackout curtains for every bedroom window", "Living and bedside rugs"]),
-         ("chair", "Decor & finishing", ["A statement mirror, three framed prints in the Outpost style",
-                                         "Four plants in ceramic or terracotta pots",
+         ("chair", "Decor & finishing", ["Statement mirror and framed prints in the Outpost style",
+                                         "Plants in ceramic or terracotta pots",
                                          "Coffee-table and bedside styling sets", "Scent diffuser and first refill"])],
         [("bath", "Guest kit", ["Tea and coffee station: kettle, jars, mugs, tray", "Welcome basket, first fill",
                                 "Refillable toiletry dispensers", "Hair dryer, iron and board, umbrella stand"]),
@@ -385,7 +382,7 @@ def build():
                                                        "Branded welcome card and printed house guide"]),
          ("mountain_bed", "The work, not just the things",
           ["Design plan, sourcing, delivery and a full installation day", "Deep clean and styling before the shoot",
-           "Professional shoot, 25+ edited images", "Listings on Airbnb, Booking.com and your direct page",
+           "Professional photo and video shoot, edited images", "Listings on Airbnb, Booking.com and your direct page",
            "AI pricing, creator launch, guidebook and house rules"])],
     ]
     for page, cols in enumerate(kit):
@@ -542,7 +539,7 @@ def build():
     opts = ["Do it yourself", "A co-host", "Outpost Classic"]
     cmp_rows = [("Commission", "None", "15–20%", "8%, min ₹4,999/month"),
                 ("Joining fee", "None", "₹20,000–50,000 typical", "₹59,999 one time"),
-                ("Setup and design", "Yours", "Yours", "₹1,11,111 · 90+ pieces, shoot, launch"),
+                ("Setup and design", "Yours", "Yours", "₹1,11,111 · design, shoot, launch"),
                 ("Cleaning", "You arrange and pay", "Usually you", "We arrange — at cost from bookings"),
                 ("Repairs", "You", "Usually you", "Handled to ₹2,000 per incident"),
                 ("Guests at 2am", "You", "Rarely", "Us, 24/7"),
@@ -647,7 +644,6 @@ def build():
         ("Is my return guaranteed?", "No. Earnings depend on occupancy, rates, season and location, and a property can earn less than its costs. The only guarantee is the Earn-Back Promise, exactly as written."),
         ("Who pays for cleaning and repairs?", "Cleaning, linen, consumables and repairs up to ₹2,000 per incident are arranged by us and deducted at cost, itemised. Anything above ₹2,000 needs your approval first."),
         ("Why is your commission only 8%?", "Our operations run on an AI system rather than a large payroll, so each extra property costs us little to run. The first 200 partners lock 8% for life."),
-        ("Can I start with less than ₹1,71,110?", "Yes. With Setup Flex you pay ₹1,15,555 at signing and the remaining ₹55,556 comes from your first six payouts, at no extra charge."),
         ("How long until my property is live?", "Under 45 days from signing, if the property is ready to work on."),
         ("When and how am I paid?", "Twice a month, on the 1st and 16th, with a statement showing every booking and deduction."),
         ("Can I still use my property?", "Yes. Owner nights are agreed at signing and blocked in the calendar. Nights beyond that allowance are excluded from the Earn-Back Promise."),
