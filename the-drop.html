@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Drop — Red Flag Homes Network</title>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --red:#E5231B;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --slow:cubic-bezier(0.65,0,0.35,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+html,body{margin:0;height:100%;background:#000;color:#fff;overflow-x:hidden}
+body{font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(255,255,255,.2)}
+:focus-visible{outline:2px solid #fff;outline-offset:3px}
+a{color:inherit}
+
+/* ── stage ─────────────────────────────────────────────── */
+.stage{position:relative;isolation:isolate;width:100%;min-height:100vh;min-height:100dvh;
+  overflow:hidden;background:#000;display:flex;flex-direction:column;
+  padding:calc(96px + env(safe-area-inset-top,0px)) 20px calc(26px + env(safe-area-inset-bottom,0px))}
+
+/* SCENE — five plates of the same room from one locked-off camera position.
+   The <img>/<video> is the real shot; the gradient behind it is the fallback and shares the same composition. */
+.scene{--focus:50% 45%;position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  transform-origin:var(--focus);will-change:transform;
+  animation:drift 20s cubic-bezier(.45,0,.55,1) infinite alternate;
+  --l-tube:radial-gradient(17% 1.1% at 58% 12%,#f4f8ff 0 45%,rgb(244 248 255 / 0) 100%);
+  --l-wash:radial-gradient(75% 48% at 58% 10%,rgb(214 226 245 / .26),rgb(214 226 245 / 0) 70%);
+  --l-plain:linear-gradient(180deg,#707478 0%,#63676b 65.9%,#7a7773 66%,#5b5855 100%);
+  --l-tiles:repeating-linear-gradient(90deg,rgb(0 0 0 / .10) 0 1px,rgb(0 0 0 / 0) 1px 12.5%) 0 100% / 100% 34% no-repeat;
+  --l-room:linear-gradient(180deg,#2a2826 0%,#211f1e 65.9%,#47321f 66%,#281c13 100%);
+  --l-planks:repeating-linear-gradient(90deg,rgb(0 0 0 / .22) 0 1px,rgb(0 0 0 / 0) 1px 7%) 0 100% / 100% 34% no-repeat;
+  --l-bulb:radial-gradient(2.6% 2% at 58% 19%,#ffe6b8 0 35%,rgb(255 196 128 / 0) 100%);
+  --l-pool:radial-gradient(40% 36% at 58% 22%,rgb(255 172 92 / .40),rgb(255 172 92 / 0) 72%);
+  --l-floor:radial-gradient(48% 16% at 58% 79%,rgb(255 168 88 / .26),rgb(255 168 88 / 0) 72%);
+  --l-strip:linear-gradient(90deg,rgb(255 196 128 / 0) 5%,rgb(255 196 128 / .34) 8% 30%,rgb(255 196 128 / 0) 33%) 0 44% / 100% 1.3% no-repeat;
+  --l-linen:radial-gradient(30% 9% at 52% 81%,rgb(232 218 198 / .5),rgb(232 218 198 / 0) 72%);
+  --l-plant:radial-gradient(8% 24% at 93% 71%,rgb(28 50 32 / .95),rgb(28 50 32 / 0) 72%);
+  --l-print:linear-gradient(rgb(228 216 198 / .16),rgb(228 216 198 / .16)) 22% 32% / 8% 16% no-repeat;
+  --l-vignette:radial-gradient(120% 95% at 55% 45%,rgb(0 0 0 / 0) 52%,rgb(0 0 0 / .5) 100%)}
+@keyframes drift{from{transform:scale(1)}to{transform:scale(1.04)}}
+.win{position:absolute;inset:0;overflow:hidden;visibility:hidden;z-index:0}
+.win.on{visibility:visible;z-index:1}
+.win.in{visibility:visible;z-index:2}
+.media{position:absolute;inset:0;z-index:0;pointer-events:none;visibility:hidden}
+.media.on,.win .media{visibility:visible}
+.media img,.media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--focus,50% 45%);display:block}
+.js .media img,.js .media video{opacity:0;transition:opacity 600ms var(--ease)}
+.js .media .ready{opacity:1}
+.m-base{background:var(--l-tube),var(--l-wash),var(--l-tiles),var(--l-plain)}
+.m-room{background:var(--l-tube),var(--l-wash),var(--l-planks),var(--l-room)}
+.m-light{background:var(--l-bulb),var(--l-pool),var(--l-floor),var(--l-strip),var(--l-planks),var(--l-room)}
+.m-style{background:var(--l-linen),var(--l-plant),var(--l-print),var(--l-bulb),var(--l-pool),var(--l-floor),var(--l-strip),var(--l-planks),var(--l-room)}
+.m-shoot{background:var(--l-vignette),var(--l-linen),var(--l-plant),var(--l-print),var(--l-bulb),var(--l-pool),var(--l-pool),var(--l-floor),var(--l-strip),var(--l-planks),var(--l-room)}
+/* the wipe's leading edge — a soft band of warm light on the incoming side */
+.seam{position:absolute;top:0;bottom:0;width:min(22vw,240px);opacity:0;pointer-events:none}
+.win.fwd .seam{right:0;background:linear-gradient(90deg,rgb(255 208 160 / 0),rgb(255 208 160 / .09) 72%,rgb(255 226 196 / .2) calc(100% - 1px),rgb(255 238 220 / .7) calc(100% - 1px))}
+.win.rev .seam{left:0;background:linear-gradient(270deg,rgb(255 208 160 / 0),rgb(255 208 160 / .09) 72%,rgb(255 226 196 / .2) calc(100% - 1px),rgb(255 238 220 / .7) calc(100% - 1px))}
+.cell.pending{opacity:.4;cursor:progress}
+.grain{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.14;
+  background-image:url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E')}
+.scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.2) 30%,rgba(0,0,0,.42) 60%,rgba(0,0,0,.88) 100%)}
+
+/* ── header ────────────────────────────────────────────── */
+header{position:absolute;top:0;left:0;width:100%;z-index:30;display:grid;
+  grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+  padding:calc(22px + env(safe-area-inset-top,0px)) 24px 16px;
+  text-shadow:0 1px 6px rgb(0 0 0 / .18)}
+.mark{font-family:'Instrument Serif',serif;font-size:19px;letter-spacing:.02em;text-decoration:none;white-space:nowrap}
+.mark b{color:var(--red);font-weight:400}
+.meta{margin-left:clamp(20px,4vw,56px);display:flex;gap:clamp(16px,3vw,32px);
+  font-size:13px;letter-spacing:-.02em;color:rgba(255,255,255,.7)}
+.try{justify-self:end;display:inline-flex;align-items:center;justify-content:center;
+  height:36px;padding:0 18px;border-radius:999px;border:1px solid rgb(255 255 255 / .7);
+  background:transparent;color:#fff;font:500 13px 'Manrope',sans-serif;text-decoration:none;white-space:nowrap;
+  transition:background 300ms,color 300ms,border-color 300ms}
+.try:hover,.try:focus-visible{background:#fff;color:#0b0908}
+
+/* ── hero copy ─────────────────────────────────────────── */
+.hero{position:relative;z-index:10;text-align:center;margin:auto 0 0}
+.eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.62);margin:0 0 14px}
+h1{margin:0;font-family:'Instrument Serif',serif;font-weight:400;
+  font-size:clamp(44px,7.4vw,96px);line-height:.9;letter-spacing:-.03em;
+  text-shadow:0 2px 14px rgb(0 0 0 / .3)}
+h1 span{display:inline-block;transition:opacity 700ms var(--ease),filter 700ms var(--ease),transform 700ms var(--ease)}
+h1 span:nth-child(2){transition-delay:70ms}
+h1 span:nth-child(3){transition-delay:140ms}
+.stage.title-hidden h1 span{opacity:0;filter:blur(12px);transform:translateY(-10px)}
+.sub{width:min(600px,100%);margin:16px auto 0;
+  font-size:clamp(13px,1.2vw,16px);line-height:1.5;letter-spacing:-.02em;color:rgba(255,255,255,.8);
+  text-shadow:0 1px 8px rgb(0 0 0 / .3);
+  transition:opacity 500ms var(--ease),max-height 500ms var(--ease)}
+.stage.picked .sub{opacity:0;max-height:0;overflow:hidden;margin-top:0}
+
+/* ── controller ────────────────────────────────────────── */
+.controller{position:relative;z-index:20;width:min(860px,100%);height:72px;
+  margin:clamp(28px,5vh,56px) auto 0;flex:none}
+.glass{position:absolute;border-radius:999px;pointer-events:none}
+.glass::before,.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none}
+.glass::before{background:
+  radial-gradient(120% 150% at var(--gx,24%) var(--gy,8%),rgb(255 255 255 / .25),rgb(255 255 255 / 0) 53%),
+  linear-gradient(115deg,rgb(255 255 255 / .10),rgb(255 255 255 / 0) 42%)}
+.glass::after{padding:1px;
+  background:conic-gradient(from 225deg,#ffd9b0,rgb(255 255 255 / .35),#ffffff,#ffc9c2,rgb(255 255 255 / .35),#ffd9b0);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude}
+.track{top:4px;left:0;width:100%;height:64px;
+  background:rgb(38 26 22 / .38);border:1px solid rgb(255 255 255 / .2);
+  -webkit-backdrop-filter:blur(9px) saturate(126%) contrast(108%) brightness(103%);
+          backdrop-filter:blur(9px) saturate(126%) contrast(108%) brightness(103%);
+  box-shadow:0 14px 38px rgb(10 6 4 / .22),0 2px 7px rgb(10 6 4 / .12),
+    inset 1px 1px 0 rgb(255 255 255 / .42),inset -1px -1px 0 rgb(40 26 21 / .16),
+    inset 0 0 0 .5px rgb(255 255 255 / .16);
+  transition:left 980ms var(--slow),width 980ms var(--slow),opacity 400ms linear}
+.track::after{opacity:.27}
+.capsule{top:-1px;height:72px;left:var(--cap-left,-5px);width:var(--cap-width,calc(20% + 5px));
+  background:rgb(255 248 243 / .22);border:1px solid rgb(255 255 255 / .28);
+  -webkit-backdrop-filter:blur(13px) saturate(128%) contrast(107%) brightness(105%);
+          backdrop-filter:blur(13px) saturate(128%) contrast(107%) brightness(105%);
+  box-shadow:0 11px 28px rgb(10 6 4 / .2),0 2px 6px rgb(10 6 4 / .12),
+    inset 1px 1px 0 rgb(255 255 255 / .58),inset -1px -1px 0 rgb(40 26 21 / .2),
+    inset 0 0 12px rgb(255 255 255 / .055);
+  transition:left 620ms var(--ease),width 620ms var(--ease),background 620ms var(--ease)}
+.capsule::after{opacity:.30}
+.cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
+.cell{display:flex;align-items:center;justify-content:center;height:100%;padding:0 12px;
+  font:400 clamp(15px,1.5vw,19px) 'Manrope',sans-serif;letter-spacing:-.03em;white-space:nowrap;color:#fff;
+  background:transparent;border:0;border-radius:999px;cursor:pointer;
+  transition:opacity 420ms var(--ease),filter 420ms var(--ease),transform 980ms var(--slow)}
+.cell[disabled]{cursor:default}
+.lead{cursor:default;color:rgba(255,255,255,.9);transition:opacity 300ms}
+.controller.hot .lead{opacity:.5}
+.stage.picked .cell:not(.on){opacity:0;filter:blur(10px);transform:scale(.94);pointer-events:none}
+.stage.picked .cell.on{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;
+  animation:reveal 520ms var(--ease)}
+@keyframes reveal{from{opacity:0;filter:blur(10px)}to{opacity:1;filter:blur(0)}}
+.stage.picked .track{left:calc(50% - 96px);width:192px;opacity:0;
+  transition:left 980ms var(--slow),width 980ms var(--slow),opacity 400ms linear 650ms}
+.stage.picked .capsule{left:calc(50% - 100px);width:200px;background:rgb(255 248 243 / .14);
+  transition:left 980ms var(--slow),width 980ms var(--slow),background 980ms var(--slow)}
+
+/* caption */
+.caption{position:relative;z-index:20;width:min(560px,100%);margin:18px auto 0;text-align:center;
+  font-size:clamp(13px,1.2vw,15px);line-height:1.5;color:rgba(255,255,255,.82);
+  min-height:0;opacity:0;transition:opacity 420ms var(--ease) 200ms}
+.stage.picked .caption{opacity:1}
+
+/* ── price + CTAs ──────────────────────────────────────── */
+.foot{position:relative;z-index:20;width:min(720px,100%);margin:auto auto 0;
+  padding-top:clamp(28px,5vh,56px);display:grid;justify-items:center;gap:14px;text-align:center}
+.price{display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.price .now{font-family:'Instrument Serif',serif;font-size:clamp(28px,4vw,42px);line-height:1}
+.price .was{font-size:14px;color:rgba(255,255,255,.45);text-decoration:line-through}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;
+  background:var(--red);color:#fff;font-size:11px;font-weight:600;letter-spacing:.1em}
+.terms{margin:0;font-size:12px;line-height:1.5;color:rgba(255,255,255,.5)}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:52px;padding:0 26px;border-radius:999px;text-decoration:none;
+  font:600 14px 'Manrope',sans-serif;letter-spacing:.02em;
+  transition:transform 200ms var(--ease),background 260ms,border-color 260ms,color 260ms}
+.btn:active{transform:scale(.98)}
+.btn-pay{background:var(--red);color:#fff;box-shadow:0 10px 30px rgb(229 35 27 / .32)}
+.btn-pay:hover{background:#ff2f24}
+.btn-pdf{background:rgb(255 255 255 / .08);color:#fff;border:1px solid rgb(255 255 255 / .28);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.btn-pdf:hover{background:rgb(255 255 255 / .16);border-color:rgb(255 255 255 / .5)}
+
+.after{display:inline-flex;align-items:center;gap:9px;
+  margin:4px 0 0;padding:8px 15px;border-radius:999px;max-width:100%;
+  background:rgb(255 255 255 / .04);border:1px solid rgb(255 255 255 / .12);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  font-size:12px;line-height:1.45;color:rgba(255,255,255,.58);text-align:left}
+.after b{color:rgba(255,255,255,.78);font-weight:500}
+.after .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.45);flex:none}
+.after a{color:rgba(255,255,255,.78);text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:rgba(255,255,255,.3);transition:color 200ms,text-decoration-color 200ms}
+.after a:hover,.after a:focus-visible{color:#fff;text-decoration-color:rgba(255,255,255,.7)}
+@media (max-width:700px){.after{font-size:11.5px;padding:9px 14px;border-radius:18px}}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ── responsive ────────────────────────────────────────── */
+@media (max-width:820px){
+  .meta{display:none}
+  .stage{padding-top:calc(84px + env(safe-area-inset-top,0px))}
+}
+@media (max-width:700px){
+  .stage{padding-left:16px;padding-right:16px}
+  .try{height:32px;padding:0 13px;font-size:12px}
+  .mark{font-size:17px}
+  .eyebrow{font-size:10px;letter-spacing:.26em}
+  .controller{height:146px;margin-top:clamp(22px,4vh,40px)}
+  .track{top:0;height:146px;border-radius:26px}
+  .cells{grid-template-columns:1fr 1fr;grid-template-rows:44px 51px 51px;align-items:stretch}
+  .lead{grid-column:1 / -1;border-bottom:1px solid rgb(255 255 255 / .12)}
+  .cells .cell:nth-child(2),.cells .cell:nth-child(4){border-right:1px solid rgb(255 255 255 / .12)}
+  .cells .cell:nth-child(2),.cells .cell:nth-child(3){border-bottom:1px solid rgb(255 255 255 / .12)}
+  .cell{font-size:15px}
+  .capsule{opacity:0;pointer-events:none}
+  .stage.picked .capsule{opacity:1;left:50%;top:50%;width:196px;height:60px;
+    transform:translate(-50%,-50%);border-radius:999px;background:rgb(255 248 243 / .18);
+    transition:opacity 300ms var(--ease)}
+  .stage.picked .cells{grid-template-columns:1fr;grid-template-rows:1fr;place-items:center}
+  .stage.picked .lead{display:none}
+  .btn{height:50px;width:100%;max-width:360px}
+}
+@media (max-height:700px){
+  .sub{display:none}
+  .stage{padding-top:calc(76px + env(safe-area-inset-top,0px))}
+  .controller{margin-top:22px}
+  .foot{padding-top:22px;gap:10px}
+  .terms{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  .capsule,.track,.cell,h1 span,.caption,.btn,.sub{transition-duration:1ms!important;transition-delay:0ms!important}
+  h1 span{filter:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .scene{animation:none}
+  .js .media img,.js .media video{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- SCENE LAYERS — one photo (or <video muted playsinline loop src="…">) per stage.
+       All five must be shot from the same tripod position, same lens, same dimensions, or the wipe breaks. -->
+  <div class="scene" id="scene">
+    <div class="media m-base on" data-scene="base"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/01-base.jpg" alt="" fetchpriority="high" onerror="this.remove()"></div>
+    <div class="media m-room"  data-scene="room"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/02-room.jpg" alt="" onerror="this.remove()"></div>
+    <div class="media m-light" data-scene="light"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/03-lighting.jpg" alt="" onerror="this.remove()"></div>
+    <div class="media m-style" data-scene="style"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/04-styling.jpg" alt="" onerror="this.remove()"></div>
+    <div class="media m-shoot" data-scene="shoot"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/05-shoot.jpg" alt="" onerror="this.remove()"></div>
+  </div>
+  <div class="grain"></div>
+  <div class="scrim"></div>
+
+  <div class="hero">
+    <div class="eyebrow">Red Flag Homes Network · The Drop</div>
+    <h1><span>Studio</span> <span>·</span> <span>Noir</span></h1>
+    <p class="sub">One room. One delivery. Guest-ready in fifteen days. 85+ pieces sourced, delivered, installed, styled and photographed — you unlock the door once and we hand it back finished.</p>
+  </div>
+
+  <div class="controller glass-wrap" id="controller" role="group" aria-label="See what changes">
+    <div class="glass track" id="track" aria-hidden="true"></div>
+    <div class="glass capsule" id="capsule" aria-hidden="true"></div>
+    <div class="cells">
+      <div class="cell lead" aria-hidden="true">See what changes&nbsp;→</div>
+      <button class="cell" type="button" data-scene="room"  data-label="The room">The room</button>
+      <button class="cell" type="button" data-scene="light" data-label="Lighting">Lighting</button>
+      <button class="cell" type="button" data-scene="style" data-label="Styling">Styling</button>
+      <button class="cell" type="button" data-scene="shoot" data-label="The shoot">The shoot</button>
+    </div>
+  </div>
+
+
+  <p class="caption" id="caption"></p>
+
+  <div class="foot">
+    <div class="price">
+      <span class="badge">35% OFF</span>
+      <span class="now">₹2,09,000</span>
+      <span class="was">₹3,21,538</span>
+    </div>
+    <div class="ctas">
+      <a class="btn btn-pay" id="pay" href="#" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>
+        Pay 10% and book now
+      </a>
+      <a class="btn btn-pdf" id="pdf" href="#" download>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg>
+        Download The Drop
+      </a>
+    </div>
+    <p class="after">
+      <span class="dot" aria-hidden="true"></span>
+      <span><a href="/franchise" target="_blank" rel="noopener">Want us to run it after handover?</a> <b>Zero onboarding cost. 8% commission, for life.</b></span>
+    </p>
+    <p class="terms">₹20,900 to book · balance in three equal parts before delivery · nothing to pay on handover day. Plus GST. Studios up to 350&nbsp;sq&nbsp;ft.</p>
+  </div>
+
+  <header>
+    <a class="mark" href="/" aria-label="Red Flag Homes Network — home">red<b>flag</b> homes</a>
+    <div class="meta"><span>The Drop is live</span><span>Fifteen days, start to finish</span></div>
+    <a class="try" href="/franchise">Managed instead →</a>
+  </header>
+
+  <p class="sr" role="status" aria-live="polite" id="live"></p>
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var ctl = document.getElementById('controller');
+  var capsule = document.getElementById('capsule');
+  var caption = document.getElementById('caption');
+  var live = document.getElementById('live');
+  var cells = [].slice.call(ctl.querySelectorAll('.cell'));
+  var buttons = [].slice.call(ctl.querySelectorAll('button.cell'));
+  var layers = [].slice.call(stage.querySelectorAll('.media'));
+  var picked = null;
+
+  var TEXT = {
+    room:  'Charcoal matte walls, warm wood plank flooring, the wardrobe refinished in matte black. The builder finish disappears.',
+    light: 'The white tubelight goes. Warm layered lighting takes its place — the single biggest change to how the room photographs.',
+    style: 'Linen, ceramics, a tray, a vase, books, a candle. Styled on the install day, not left in boxes for you to arrange.',
+    shoot: 'A full photo shoot on handover day. Photographs are 80% of the booking decision — a kit without a shoot is half a job.'
+  };
+
+  var POS = [
+    { l: '-5px', w: 'calc(20% + 5px)' },
+    { l: '20%',  w: '20%' },
+    { l: '40%',  w: '20%' },
+    { l: '60%',  w: '20%' },
+    { l: '80%',  w: 'calc(20% + 5px)' }
+  ];
+
+  function moveCapsule(i) {
+    ctl.style.setProperty('--cap-left', POS[i].l);
+    ctl.style.setProperty('--cap-width', POS[i].w);
+    ctl.classList.toggle('hot', i > 0);
+  }
+
+  /* ---- scene engine: directional wipe between aligned plates ---- */
+  var EASE = 'cubic-bezier(0.22,1,0.36,1)', DUR = 900;
+  var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var scenes = {}, current = null, tx = null;
+
+  buttons.forEach(function (b) {
+    b.disabled = true;
+    b.classList.add('pending');
+    b.setAttribute('aria-busy', 'true');
+  });
+
+  layers.forEach(function (m) {
+    var win = document.createElement('div');
+    var seam = document.createElement('i');
+    win.className = 'win';
+    seam.className = 'seam';
+    m.parentNode.insertBefore(win, m);
+    win.appendChild(m);
+    win.appendChild(seam);
+    var s = { name: m.getAttribute('data-scene'), win: win, media: m, seam: seam, ready: false };
+    scenes[s.name] = s;
+    if (m.classList.contains('on')) { win.classList.add('on'); current = s; }
+    prime(s).then(function () {
+      s.ready = true;
+      if (s === current) play(s);
+      buttons.forEach(function (b) {
+        if (b.getAttribute('data-scene') !== s.name) return;
+        b.classList.remove('pending');
+        b.removeAttribute('aria-busy');
+        if (!picked) b.disabled = false;
+      });
+    });
+  });
+
+  // Resolves once the slot can be shown without a blank frame: decoded photo, first video frame, or the gradient fallback.
+  function prime(s) {
+    var el = s.media.querySelector('img,video');
+    if (!el) return Promise.resolve();
+    return new Promise(function (done) {
+      var isVid = el.tagName === 'VIDEO';
+      function fail() { if (el.parentNode) el.parentNode.removeChild(el); done(); }
+      function ok() {
+        var p = !isVid && el.decode ? el.decode() : Promise.resolve();
+        p.then(function () { el.classList.add('ready'); done(); }, fail);
+      }
+      if (isVid) {
+        el.muted = true; el.playsInline = true; el.preload = 'auto';
+        var srcs = el.querySelectorAll('source');
+        if (srcs.length) srcs[srcs.length - 1].addEventListener('error', fail, { once: true });
+        if (el.readyState >= 2) ok();
+        else { el.addEventListener('loadeddata', ok, { once: true }); el.addEventListener('error', fail, { once: true }); }
+      } else if (el.complete) {
+        el.naturalWidth ? ok() : fail();
+      } else {
+        el.addEventListener('load', ok, { once: true });
+        el.addEventListener('error', fail, { once: true });
+      }
+    });
+  }
+
+  function play(s) {
+    var v = s.media.querySelector('video');
+    if (v && !reduceMQ.matches) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+  function pause(s) {
+    var v = s.media.querySelector('video');
+    if (v) v.pause();
+  }
+
+  function settle() {
+    var t = tx;
+    if (!t) return;
+    tx = null;
+    var keep = t.back ? t.from : t.to, drop = t.back ? t.to : t.from;
+    keep.win.classList.add('on');
+    drop.win.classList.remove('on');
+    t.to.win.classList.remove('in', 'fwd', 'rev');
+    t.anims.forEach(function (a) { a.cancel(); });
+    current = keep;
+    pause(drop);
+  }
+
+  // Forward stages wipe in left→right; returning to the plain room wipes right→left.
+  function go(target, dir) {
+    if (!target) return;
+    if (tx) {
+      if (target === (tx.back ? tx.from : tx.to)) return;
+      if (target === (tx.back ? tx.to : tx.from)) {
+        tx.back = !tx.back;
+        tx.anims.forEach(function (a) { a.reverse(); });
+        return;
+      }
+      settle();
+    }
+    if (target === current) return;
+    var from = current;
+    play(target);
+    if (reduceMQ.matches || !target.win.animate) {
+      target.win.classList.add('on');
+      from.win.classList.remove('on');
+      current = target;
+      pause(from);
+      return;
+    }
+    var sx = dir === 'rev' ? 100 : -100;
+    var opt = { duration: DUR, easing: EASE, fill: 'both' };
+    var t = { from: from, to: target, back: false };
+    target.win.classList.add('in', dir);
+    // The window slides in while the plate counter-slides, so the photo itself never moves — only the edge does.
+    t.anims = [
+      target.win.animate([{ transform: 'translate3d(' + sx + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
+      target.media.animate([{ transform: 'translate3d(' + (-sx) + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
+      target.seam.animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], opt)
+    ];
+    t.anims[0].onfinish = function () { if (tx === t) settle(); };
+    tx = t;
+  }
+
+  function show(scene) {
+    go(scenes[scene], scene === 'base' ? 'rev' : 'fwd');
+  }
+
+  function select(btn) {
+    var scene = btn.getAttribute('data-scene');
+    picked = btn;
+    show(scene);
+    caption.textContent = TEXT[scene] || '';
+    stage.classList.add('picked', 'title-hidden');
+    buttons.forEach(function (b) {
+      var on = b === btn;
+      b.classList.toggle('on', on);
+      if (on) { b.textContent = 'Reset'; }
+      else { b.disabled = true; b.setAttribute('aria-hidden', 'true'); b.tabIndex = -1; }
+    });
+    live.textContent = btn.getAttribute('data-label') + ' shown. Reset to go back.';
+    try { btn.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  function reset() {
+    show('base');
+    stage.classList.remove('picked', 'title-hidden');
+    caption.textContent = '';
+    buttons.forEach(function (b) {
+      b.classList.remove('on');
+      b.disabled = !scenes[b.getAttribute('data-scene')].ready;
+      b.removeAttribute('aria-hidden');
+      b.tabIndex = 0;
+      b.textContent = b.getAttribute('data-label');
+    });
+    moveCapsule(0);
+    picked = null;
+    live.textContent = 'Back to the base room.';
+  }
+
+  buttons.forEach(function (b, i) {
+    b.addEventListener('click', function () { picked === b ? reset() : select(b); });
+    b.addEventListener('mouseenter', function () { if (!picked) moveCapsule(i + 1); });
+    b.addEventListener('focus', function () { if (!picked) moveCapsule(i + 1); });
+  });
+  ctl.addEventListener('mouseleave', function () { if (!picked) moveCapsule(0); });
+  ctl.addEventListener('pointermove', function (e) {
+    var r = ctl.getBoundingClientRect();
+    ctl.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+    ctl.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+  }, { passive: true });
+
+  /* ---- links: put your real ones here ---- */
+  var RAZORPAY = '';   // e.g. 'https://rzp.io/l/xxxxxxxx'
+  var PDF = '';        // e.g. '/TheDrop_Studio_Noir.pdf'
+  var pay = document.getElementById('pay'), pdf = document.getElementById('pdf');
+  if (RAZORPAY) { pay.href = RAZORPAY; } else {
+    pay.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
+  }
+  if (PDF) { pdf.href = PDF; } else {
+    pdf.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Brochure link not set yet.'; });
+  }
+})();
+</script>
+</body>
+</html>
