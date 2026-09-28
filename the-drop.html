@@ -19,7 +19,7 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
-html,body{margin:0;height:100%;background:#000;color:#fff;overflow-x:hidden}
+html,body{margin:0;background:#000;color:#fff;overflow-x:clip}
 body{font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:rgba(255,255,255,.2)}
 :focus-visible{outline:2px solid #fff;outline-offset:3px}
@@ -233,6 +233,180 @@ h1 span:nth-child(3){transition-delay:140ms}
   .scene{animation:none}
   .js .media img,.js .media video{transition:none}
 }
+
+/* picked state: the Reset button sits inside the collapsed capsule instead of in its old column */
+.stage.picked .cell.on{position:absolute;inset:0;margin:auto;width:200px;border:0;
+  transition:opacity 420ms var(--ease),filter 420ms var(--ease)}
+@media (max-width:700px){.stage.picked .cell.on{width:196px;height:60px}}
+
+/* ── sections below the hero ───────────────────────────── */
+.sec{--ink:#12100e;--cream:#ede6da;--brass:#c9955f;--brass-deep:#8a5529;
+  position:relative;background:var(--ink);color:#fff;padding:clamp(72px,10vw,128px) clamp(20px,5vw,48px)}
+.sec.cream{background:var(--cream);color:#1c1916}
+.sec.deep{background:#0b0908}
+.wrap{max-width:1160px;margin:0 auto}
+.kicker{margin:0 0 18px;font-size:11px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--brass)}
+.cream .kicker{color:var(--brass-deep)}
+.sec h2{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.02em;max-width:18ch}
+.sec h3{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(22px,2.4vw,28px);line-height:1.15;letter-spacing:-.01em}
+.lede{margin:22px 0 0;max-width:58ch;font-size:clamp(15px,1.3vw,17px);line-height:1.6;color:rgba(255,255,255,.72)}
+.cream .lede{color:rgb(28 25 22 / .72)}
+.fine{margin:28px 0 0;font-size:12.5px;line-height:1.6;color:rgba(255,255,255,.5)}
+.cream .fine{color:rgb(28 25 22 / .58)}
+
+/* what this is */
+.ones{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,3vw,40px);margin:48px 0 0;padding:0;list-style:none}
+.ones li{border-top:1px solid rgb(28 25 22 / .18);padding-top:18px;font-size:13px;color:rgb(28 25 22 / .65)}
+.ones b{display:block;margin-bottom:4px;font:italic 400 clamp(30px,3.4vw,42px)/1 'Instrument Serif',serif;color:var(--brass-deep)}
+.nos{margin:40px 0 0;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#b3241c;line-height:1.9}
+
+/* picture your studio */
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.6vw,20px);margin:48px 0 0}
+.shot{margin:0}
+.shot-img{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;
+  background:radial-gradient(90% 70% at 55% 30%,#4a3a2c 0%,#1e1814 60%,#0d0b0a 100%)}
+.shot-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.shot .tag{position:absolute;left:12px;bottom:12px;font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgb(0 0 0 / .6)}
+.shot figcaption{margin-top:14px;font:italic 400 19px/1.3 'Instrument Serif',serif;color:rgba(255,255,255,.82)}
+
+/* the look + light */
+.look{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(40px,6vw,96px);align-items:start}
+.swatches{display:flex;flex-wrap:wrap;gap:18px 22px;margin:36px 0 0;padding:0;list-style:none}
+.swatches li{display:grid;justify-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.6);width:64px;text-align:center}
+.swatches i{width:44px;height:44px;border-radius:50%;border:1px solid rgb(255 255 255 / .16)}
+.ticks{margin:30px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72)}
+.ticks li::before{content:"— ";color:var(--brass)}
+.kelvin{border-left:1px solid rgb(255 255 255 / .12);padding-left:clamp(24px,4vw,56px)}
+.kelvin .big{display:block;margin:10px 0 6px;font:400 clamp(64px,8vw,104px)/.9 'Instrument Serif',serif;letter-spacing:-.03em;color:var(--brass)}
+.kelvin .unit{font-size:13px;color:rgba(255,255,255,.6)}
+
+/* included */
+.groups{display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(28px,4vw,64px);margin:44px 0 0}
+.group{border-top:1px solid rgb(28 25 22 / .18)}
+.group summary{display:flex;align-items:center;gap:16px;min-height:60px;padding:14px 0;cursor:pointer;list-style:none;
+  font:400 22px/1.2 'Instrument Serif',serif}
+.group summary::-webkit-details-marker{display:none}
+.group summary span{margin-left:auto;font:500 12px 'Manrope',sans-serif;color:rgb(28 25 22 / .55);white-space:nowrap}
+.group summary::after{content:"+";font:400 22px/1 'Manrope',sans-serif;color:var(--brass-deep);transition:transform 300ms var(--ease)}
+.group[open] summary::after{transform:rotate(45deg)}
+.group summary:focus-visible{outline:2px solid #1c1916;outline-offset:2px}
+.items{margin:0 0 20px;padding:0;list-style:none;font-size:14px;line-height:1.45}
+.items li{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgb(28 25 22 / .08)}
+.items li span:last-child{flex:none;color:var(--brass-deep);font-variant-numeric:tabular-nums;text-align:right}
+.note{margin:36px 0 0;padding:20px 22px;border-radius:6px;background:rgb(28 25 22 / .06);font-size:14px;line-height:1.55;color:rgb(28 25 22 / .75);max-width:640px}
+.note b{display:block;margin-bottom:4px;font:400 20px 'Instrument Serif',serif;color:#1c1916}
+
+/* service */
+.steps{margin:44px 0 0;padding:0;list-style:none;border-top:1px solid rgb(255 255 255 / .12)}
+.steps li{display:grid;grid-template-columns:minmax(180px,1fr) 2fr;gap:24px;padding:22px 0;border-bottom:1px solid rgb(255 255 255 / .12);align-items:baseline}
+.steps b{font:400 24px/1.2 'Instrument Serif',serif}
+.steps span{font-size:15px;line-height:1.55;color:rgba(255,255,255,.7)}
+.pull{margin:40px 0 0;font:italic 400 clamp(20px,2.2vw,26px)/1.35 'Instrument Serif',serif;color:var(--brass);max-width:40ch}
+
+/* pricing */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2vw,24px);margin:48px 0 0}
+.plan{display:flex;flex-direction:column;padding:clamp(24px,3vw,36px);border-radius:10px;background:#16130f;border:1px solid rgb(255 255 255 / .1)}
+.plan.best{border-color:rgb(201 149 95 / .7);background:linear-gradient(180deg,#1d1812,#16130f)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.1em}
+.chip.red{background:var(--red);color:#fff}
+.chip.gold{background:rgb(201 149 95 / .18);color:#e6bc8f}
+.plan h3{margin-top:22px;font-size:clamp(28px,3vw,36px)}
+.plan .was{margin:14px 0 0;font-size:14px;color:rgba(255,255,255,.42);text-decoration:line-through}
+.plan .now{margin:2px 0 0;font:400 clamp(38px,4.4vw,52px)/1 'Instrument Serif',serif}
+.plan .gst{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.5)}
+.plan ul{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;line-height:1.45}
+.plan li{display:grid;grid-template-columns:18px 1fr;gap:8px;color:rgba(255,255,255,.85)}
+.plan li.no{color:rgba(255,255,255,.4)}
+.plan li::before{content:"✓";color:var(--brass)}
+.plan li.no::before{content:"—";color:rgba(255,255,255,.3)}
+.plan .fit{margin:22px 0 26px;font:italic 400 17px/1.4 'Instrument Serif',serif;color:rgba(255,255,255,.7)}
+.plan .btn{margin-top:auto;width:100%}
+
+/* gift */
+.gift{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(36px,6vw,96px);align-items:center}
+.plate{position:relative;aspect-ratio:16/10;border-radius:10px;display:grid;place-content:center;text-align:center;
+  background:linear-gradient(135deg,#d7b27c,#b88a52 45%,#e2c28f 70%,#a97b45);
+  box-shadow:0 30px 60px rgb(60 40 20 / .28),inset 0 1px 0 rgb(255 255 255 / .5),inset 0 -2px 6px rgb(80 50 20 / .35)}
+.plate::before{content:"";position:absolute;inset:14px;border:1px solid rgb(70 45 20 / .35);border-radius:4px}
+.plate small{font-size:12px;font-weight:700;letter-spacing:.34em;color:#3d2912}
+.plate em{display:block;margin-top:8px;font:italic 400 clamp(28px,3.4vw,40px)/1 'Instrument Serif',serif;color:#2e1f0e}
+.plate + p{margin:12px 0 0;text-align:center;font-size:12px;color:rgb(28 25 22 / .55)}
+.gifts{margin:32px 0 0;padding:0;list-style:none;border-top:1px solid rgb(28 25 22 / .16)}
+.gifts li{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:16px 0;border-bottom:1px solid rgb(28 25 22 / .16)}
+.gifts li > span{grid-row:span 2;font-size:12px;font-weight:600;color:var(--brass-deep);padding-top:5px}
+.gifts b{font:400 21px/1.2 'Instrument Serif',serif}
+.gifts small{font-size:13px;color:rgb(28 25 22 / .6)}
+
+/* add-ons + not included */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,96px)}
+.prices{margin:32px 0 0;padding:0;list-style:none}
+.prices li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgb(255 255 255 / .1);font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.82)}
+.prices li span:last-child{flex:none;color:var(--brass);font-variant-numeric:tabular-nums}
+.nots{margin:32px 0 0;padding:0;list-style:none}
+.nots li{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:12px 0;border-bottom:1px solid rgb(255 255 255 / .1);font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.78)}
+.nots li::before{content:"✕";color:var(--red);font-size:12px;padding-top:2px}
+
+/* timeline */
+.days{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin:52px 0 0;padding:0;list-style:none}
+.days li{position:relative;padding:28px 16px 0 0;border-top:1px solid rgb(28 25 22 / .22)}
+.days li::before{content:"";position:absolute;top:-6px;left:0;width:11px;height:11px;border-radius:50%;background:var(--brass-deep)}
+.days li:last-child::before{background:var(--red)}
+.days b{display:block;font:400 26px/1.1 'Instrument Serif',serif;margin-bottom:10px}
+.days p{margin:0;font-size:13.5px;line-height:1.5;color:rgb(28 25 22 / .7)}
+.days .pay{display:inline-block;margin-top:14px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgb(138 85 41 / .14);color:var(--brass-deep)}
+.days .pay.first{background:#1c1916;color:var(--cream)}
+.days .pay.none{background:rgb(28 25 22 / .07);color:rgb(28 25 22 / .6)}
+.paybar{margin:44px 0 0;padding:16px 20px;border-radius:6px;background:#1c1916;color:var(--cream);font-size:13.5px;line-height:1.5}
+
+/* faq */
+.faq{margin:44px 0 0;border-top:1px solid rgb(255 255 255 / .12);max-width:880px}
+.faq details{border-bottom:1px solid rgb(255 255 255 / .12)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:64px;padding:16px 0;cursor:pointer;list-style:none;
+  font:400 clamp(19px,2vw,23px)/1.3 'Instrument Serif',serif}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";flex:none;font:400 22px/1 'Manrope',sans-serif;color:var(--brass);transition:transform 300ms var(--ease)}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{margin:0 0 22px;max-width:62ch;font-size:15px;line-height:1.6;color:rgba(255,255,255,.7)}
+
+/* order */
+.order{text-align:center}
+.order h2{margin:0 auto;max-width:16ch}
+.order .lede{margin-left:auto;margin-right:auto}
+.order .row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:36px 0 0}
+.order .mini{margin:26px 0 0;font-size:13px;color:rgba(255,255,255,.6)}
+.order .mini b{color:#fff;font-weight:600}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgb(255 255 255 / .28)}
+.btn-ghost:hover{background:rgb(255 255 255 / .08);border-color:rgb(255 255 255 / .5)}
+
+footer.site{background:#0b0908;color:rgba(255,255,255,.55);padding:56px clamp(20px,5vw,48px) calc(40px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid rgb(255 255 255 / .08);font-size:12.5px;line-height:1.6}
+footer.site .wrap{display:grid;gap:14px}
+footer.site .big{font:400 clamp(26px,3vw,34px)/1 'Instrument Serif',serif;color:#fff;text-decoration:none}
+footer.site a{color:rgba(255,255,255,.8)}
+footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
+
+@media (max-width:900px){
+  .look,.gift,.two{grid-template-columns:1fr}
+  .kelvin{border-left:0;padding-left:0;border-top:1px solid rgb(255 255 255 / .12);padding-top:32px}
+  .groups{grid-template-columns:1fr}
+  .days{grid-template-columns:1fr 1fr 1fr;row-gap:36px}
+}
+@media (max-width:700px){
+  .ones{grid-template-columns:1fr;gap:18px}
+  .shots{--gut:clamp(20px,5vw,48px);display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;
+    margin-left:calc(-1 * var(--gut));margin-right:calc(-1 * var(--gut));padding:0 var(--gut) 6px;scroll-padding:0 var(--gut);scrollbar-width:none}
+  .shots::-webkit-scrollbar{display:none}
+  .shot{flex:0 0 82%;scroll-snap-align:start}
+  .plans{grid-template-columns:1fr}
+  .steps li{grid-template-columns:1fr;gap:6px}
+  .days{grid-template-columns:1fr;row-gap:0}
+  .days li{padding:0 0 28px 28px;border-top:0;border-left:1px solid rgb(28 25 22 / .22)}
+  .days li:last-child{border-left-color:transparent}
+  .days li::before{top:2px;left:-6px}
+  .order .row .btn{width:100%;max-width:360px}
+}
 </style>
 </head>
 <body>
@@ -303,6 +477,345 @@ h1 span:nth-child(3){transition-delay:140ms}
 
   <p class="sr" role="status" aria-live="polite" id="live"></p>
 </div>
+
+<main>
+  <section class="sec cream" id="what" aria-labelledby="what-h">
+    <div class="wrap">
+      <p class="kicker">What this is</p>
+      <h2 id="what-h">Fifteen days after you book, your studio looks like a boutique hotel room.</h2>
+      <p class="lede">You have a studio with an AC, a fan, a wardrobe and white tubelights. We turn it into a room that is ready to take bookings. We source everything, bring it, assemble it, style it, deep clean it and photograph it. You unlock the door once and we hand it back finished.</p>
+      <ul class="ones">
+        <li><b>One</b>order</li>
+        <li><b>One</b>delivery</li>
+        <li><b>One</b>install day</li>
+      </ul>
+      <p class="nos">No market trips · No fifteen deliveries · No carpenter who doesn’t turn up</p>
+    </div>
+  </section>
+
+  <section class="sec" id="look" aria-labelledby="look-h">
+    <div class="wrap">
+      <p class="kicker">Sample images · How your studio could look</p>
+      <h2 id="look-h">Picture your studio like this.</h2>
+      <div class="shots">
+        <figure class="shot">
+          <div class="shot-img">
+            <img src="drop/studio-noir/sample-living.jpg" alt="Sample Noir studio at night: charcoal sofa and coffee table, the bed behind a black-framed glass partition, a round table by the kitchenette" loading="lazy" decoding="async" onerror="this.remove()">
+            <span class="tag">Sample image</span>
+          </div>
+          <figcaption>Living, sleeping, dining</figcaption>
+        </figure>
+        <figure class="shot">
+          <div class="shot-img">
+            <img src="drop/studio-noir/sample-plan.jpg" alt="Sample studio seen from above: bed, work table, kitchen wall, wardrobe, sofa and shower room planned as one layout" loading="lazy" decoding="async" onerror="this.remove()">
+            <span class="tag">Sample image</span>
+          </div>
+          <figcaption>The whole studio, planned</figcaption>
+        </figure>
+        <figure class="shot">
+          <div class="shot-img">
+            <img src="drop/studio-noir/sample-kitchenette.jpg" alt="Sample Noir studio: black kitchenette with warm under-cabinet light, rattan pendant, bed with cream linen and plants" loading="lazy" decoding="async" onerror="this.remove()">
+            <span class="tag">Sample image</span>
+          </div>
+          <figcaption>Kitchenette and bed</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec deep" id="noir" aria-labelledby="noir-h">
+    <div class="wrap look">
+      <div>
+        <p class="kicker">The look</p>
+        <h2 id="noir-h">Noir is warm, not cold.</h2>
+        <ul class="swatches" aria-label="Palette">
+          <li><i style="background:#2b2927"></i>Charcoal</li>
+          <li><i style="background:#8a5a36"></i>Warm wood</li>
+          <li><i style="background:#e6dccb"></i>Cream &amp; oatmeal</li>
+          <li><i style="background:#141414"></i>Black metal</li>
+          <li><i style="background:#c49a5a"></i>Brass</li>
+          <li><i style="background:#7c8f6b"></i>Green</li>
+        </ul>
+        <ul class="ticks">
+          <li>Deep charcoal surfaces in matte — never gloss</li>
+          <li>Jute and wood texture to keep the room soft</li>
+          <li>Cream and oatmeal bedding layered over dark furniture</li>
+          <li>Black-framed art, terracotta pots, real plants, brass accents</li>
+        </ul>
+      </div>
+      <div class="kelvin">
+        <p class="kicker">The single biggest change</p>
+        <h3>It’s the light.</h3>
+        <span class="big">2700K</span>
+        <span class="unit">warm, in every fitting we install</span>
+        <p class="lede">White tubelights make any room photograph like a clinic. We light from lamps, sconces and a pendant instead of one ceiling tube — the difference between a dark room and an expensive one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec cream" id="included" aria-labelledby="inc-h">
+    <div class="wrap">
+      <p class="kicker">Everything included, with sizes</p>
+      <h2 id="inc-h">85+ pieces. Every one of them sized.</h2>
+      <div class="groups">
+        <div>
+          <details class="group" open>
+            <summary>Sleep <span>8 items</span></summary>
+            <ul class="items">
+              <li><span>Queen bed frame with box storage, dark finish</span><span>78 × 60 in</span></li>
+              <li><span>Medium-firm mattress</span><span>78 × 60 × 6 in</span></li>
+              <li><span>Mattress protectors</span><span>78 × 60 in</span></li>
+              <li><span>Pillows — soft and firm, with protectors</span><span>18 × 28 in</span></li>
+              <li><span>Full linen sets — fitted, flat, pillow covers, 300TC</span><span>Flat 90 × 108 in</span></li>
+              <li><span>Knit throw and waffle throw</span><span>50 × 60 in</span></li>
+              <li><span>Cushion covers with inserts</span><span>45 × 45 cm</span></li>
+              <li><span>Black metal bedside tables</span><span>40 × 40 × 55 cm</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Furniture <span>4 items</span></summary>
+            <ul class="items">
+              <li><span>Console or open shelf unit, black metal and wood</span><span>100 × 35 × 75 cm</span></li>
+              <li><span>Accent chair, cane or wishbone style</span><span>55 × 55 × 80 cm</span></li>
+              <li><span>Round side table, dark wood</span><span>45 cm dia</span></li>
+              <li><span>Full-length mirror, black frame</span><span>150 × 40 cm</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Floor and windows <span>2 items</span></summary>
+            <ul class="items">
+              <li><span>Jute rug under the bed</span><span>6 × 4 ft</span></li>
+              <li><span>Blackout curtains, oatmeal, with black rod</span><span>4.5 × 9 ft panels</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Kitchenette <span>7 items</span></summary>
+            <ul class="items">
+              <li><span>Induction hob</span><span>2000 W</span></li>
+              <li><span>Electric kettle</span><span>1.5 L</span></li>
+              <li><span>Crockery, cutlery and glassware for two</span><span>—</span></li>
+              <li><span>Pan and pot</span><span>24 cm · 2 L</span></li>
+              <li><span>Chopping board and knife</span><span>30 × 20 cm</span></li>
+              <li><span>Storage jars, tea and coffee station on a brass tray</span><span>35 cm tray</span></li>
+              <li><span>Dish rack and bin</span><span>—</span></li>
+            </ul>
+          </details>
+        </div>
+        <div>
+          <details class="group" open>
+            <summary>Lighting <span>6 items</span></summary>
+            <ul class="items">
+              <li><span>Rattan or smoked-glass pendant over the bed</span><span>40 cm dia</span></li>
+              <li><span>Black metal wall sconces with brass inner</span><span>15 × 25 cm</span></li>
+              <li><span>Table lamp with amber shade</span><span>35 cm high</span></li>
+              <li><span>Slim black floor lamp</span><span>150 cm high</span></li>
+              <li><span>Under-cabinet warm LED strip</span><span>1 m</span></li>
+              <li><span>Warm 2700K bulbs throughout, plus a night light</span><span>2700K</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Bathroom <span>8 items</span></summary>
+            <ul class="items">
+              <li><span>Bath towels</span><span>75 × 150 cm</span></li>
+              <li><span>Hand towels and face towels</span><span>40 × 60 · 30 × 30 cm</span></li>
+              <li><span>Bath mats</span><span>50 × 80 cm</span></li>
+              <li><span>Refillable dispensers — shampoo, conditioner, body wash, hand wash</span><span>300 ml</span></li>
+              <li><span>Mirror, shelf, towel rail and hooks</span><span>60 × 80 cm mirror</span></li>
+              <li><span>Bin, toilet brush, bucket and mug</span><span>—</span></li>
+              <li><span>Hair dryer</span><span>1200 W</span></li>
+              <li><span>Upgraded shower head</span><span>—</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Safety, utility and access <span>5 items</span></summary>
+            <ul class="items">
+              <li><span>Keyless smart lock — fingerprint, PIN and key backup</span><span>Fits 35–60 mm doors</span></li>
+              <li><span>Water purifier</span><span>7 L RO</span></li>
+              <li><span>Smoke alarm, fire extinguisher, fire blanket, first-aid kit</span><span>2 kg ABC</span></li>
+              <li><span>Iron and board, drying rack, laundry basket</span><span>—</span></li>
+              <li><span>Hangers, extension boards, cleaning set</span><span>4-socket</span></li>
+            </ul>
+          </details>
+          <details class="group">
+            <summary>Styling and welcome <span>5 items</span></summary>
+            <ul class="items">
+              <li><span>Framed prints, black frames</span><span>A2 · 42 × 59 cm</span></li>
+              <li><span>Plants in pots, plus a woven basket planter</span><span>60–120 cm</span></li>
+              <li><span>Tray, vase, books, candle and coasters, styled on the day</span><span>—</span></li>
+              <li><span>Scent diffuser with first refill</span><span>200 ml</span></li>
+              <li><span>Welcome basket and a printed house guide</span><span>A5, bound</span></li>
+            </ul>
+          </details>
+        </div>
+      </div>
+      <p class="note"><b>Fridge and microwave?</b>Not included as standard — most studios don’t need them, and it keeps your price down. Add either as an add-on if you want them.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="service" aria-labelledby="svc-h">
+    <div class="wrap">
+      <p class="kicker">And the part nobody else does</p>
+      <h2 id="svc-h">Not a kit. A finished room.</h2>
+      <ul class="steps">
+        <li><b>Design plan</b><span>A full layout before anything is ordered, so the room works as a whole.</span></li>
+        <li><b>Sourcing and delivery</b><span>One order, one contact — not fifteen sellers.</span></li>
+        <li><b>Full install day</b><span>Assembled, hung, placed and styled by our team.</span></li>
+        <li><b>Deep clean</b><span>Guest-ready, not builder-dusty.</span></li>
+        <li><b>Professional shoot</b><span>20+ edited images, ready to upload the same evening.</span></li>
+      </ul>
+      <p class="pull">Photographs are 80% of the booking decision. A kit without a shoot is half a job.</p>
+    </div>
+  </section>
+
+  <section class="sec deep" id="pricing" aria-labelledby="price-h">
+    <div class="wrap">
+      <p class="kicker">Two versions</p>
+      <h2 id="price-h">Choose your Noir.</h2>
+      <div class="plans">
+        <article class="plan">
+          <div class="chips"><span class="chip red">35% OFF</span><span class="chip gold">+ FREE RED FLAG GIFT</span></div>
+          <h3>Core</h3>
+          <p class="was">₹3,21,538</p>
+          <p class="now">₹2,09,000</p>
+          <p class="gst">plus GST · ₹20,900 to book</p>
+          <ul>
+            <li>Everything on this page</li>
+            <li class="no">Charcoal matte paint, two walls</li>
+            <li class="no">Warm wood vinyl plank flooring</li>
+            <li class="no">Wardrobe refinished in matte black</li>
+          </ul>
+          <p class="fit">If your floor and walls are already presentable.</p>
+          <a class="btn btn-pay" data-pay="core" href="#" target="_blank" rel="noopener">Pay 10% and book Core</a>
+        </article>
+        <article class="plan best">
+          <div class="chips"><span class="chip red">35% OFF</span><span class="chip gold">+ FREE RED FLAG GIFT</span></div>
+          <h3>Full Noir</h3>
+          <p class="was">₹4,29,231</p>
+          <p class="now">₹2,79,000</p>
+          <p class="gst">plus GST · ₹27,900 to book</p>
+          <ul>
+            <li>Everything on this page</li>
+            <li>Charcoal matte paint, two walls</li>
+            <li>Warm wood vinyl plank flooring</li>
+            <li>Wardrobe refinished in matte black</li>
+          </ul>
+          <p class="fit">If the room still looks like a builder handed it over.</p>
+          <a class="btn btn-pay" data-pay="full" href="#" target="_blank" rel="noopener">Pay 10% and book Full Noir</a>
+        </article>
+      </div>
+      <p class="fine">Plus applicable GST. For studios up to 350 sq ft. Delivery and installation included in Goa, Mumbai, Bengaluru, Delhi NCR and Lucknow; outside these, at cost.</p>
+    </div>
+  </section>
+
+  <section class="sec cream" id="gift" aria-labelledby="gift-h">
+    <div class="wrap gift">
+      <div>
+        <div class="plate" aria-hidden="true"><small>RED FLAG ×</small><em>Your Property</em></div>
+        <p>Branded brass name plate</p>
+      </div>
+      <div>
+        <p class="kicker">Free with both packages</p>
+        <h2 id="gift-h">A welcome gift from Red Flag Homes.</h2>
+        <ul class="gifts">
+          <li><span>01</span><b>Branded brass name plate</b><small>Engraved, for your front door</small></li>
+          <li><span>02</span><b>Branded tissues</b><small>For the room and the bathroom</small></li>
+          <li><span>03</span><b>Branded slippers</b><small>Waiting by the bed for every guest</small></li>
+          <li><span>04</span><b>Branded glass water bottles</b><small>On the bedside, ready for check-in</small></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="extras" aria-label="Add-ons and exclusions">
+    <div class="wrap two">
+      <div>
+        <p class="kicker">Add what you need</p>
+        <h2>Make it yours.</h2>
+        <ul class="prices">
+          <li><span>Mini fridge, 45–50 L</span><span>₹14,000</span></li>
+          <li><span>Microwave, 20 L</span><span>₹10,000</span></li>
+          <li><span>WiFi router with guest network, set up</span><span>₹4,500</span></li>
+          <li><span>Smart TV 32" with streaming stick, wall-mounted</span><span>₹22,000</span></li>
+          <li><span>Round table with chair — eating or working</span><span>₹9,500</span></li>
+          <li><span>Branded amenity kit — tissue, toiletries, coasters, welcome card</span><span>₹8,000</span></li>
+          <li><span>Reels package — vertical video for Instagram and your listing</span><span>₹15,000</span></li>
+          <li><span>Restock subscription — linen, toiletries, consumables</span><span>₹2,500 / month</span></li>
+        </ul>
+        <p class="fine">Add-ons plus applicable GST. Installed on the same day.</p>
+      </div>
+      <div>
+        <p class="kicker">What’s not included</p>
+        <h2>Said plainly, up front.</h2>
+        <ul class="nots">
+          <li>Structural, plumbing or electrical work, false ceilings, rewiring</li>
+          <li>Air conditioner, fan and wardrobe — we work with what you already have</li>
+          <li>Washing machine and dishwasher</li>
+          <li>Additional or sofa beds — quoted separately</li>
+          <li>Studios above 350 sq ft — quoted separately</li>
+          <li>Your society or building permissions</li>
+        </ul>
+        <p class="fine">We work with what you already have — and quote anything bigger separately.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec cream" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="kicker">How it works</p>
+      <h2 id="how-h">Fifteen days from booking to a bookable room.</h2>
+      <ol class="days">
+        <li><b>Day 0</b><p>Send photos and measurements. We confirm the price within 24 hours.</p><span class="pay first">10% to book</span></li>
+        <li><b>Day 1</b><p>Approve the design plan with the actual items. Sourcing starts.</p><span class="pay">30%</span></li>
+        <li><b>Day 2–12</b><p>Everything is made and collected at our end. Nothing lands at your door piecemeal.</p><span class="pay">30% by day 7</span></li>
+        <li><b>Day 13</b><p>Everything is packed and dispatched to your studio.</p><span class="pay">30% before delivery</span></li>
+        <li><b>Day 14</b><p>Install day. We assemble, place, hang and style the entire room.</p></li>
+        <li><b>Day 15</b><p>Deep clean and professional shoot. Images sent that evening.</p><span class="pay none">Nothing to pay</span></li>
+      </ol>
+      <p class="paybar">10% to book · the balance in three equal parts, all before delivery · nothing to pay on handover day</p>
+    </div>
+  </section>
+
+  <section class="sec" id="faq" aria-labelledby="faq-h">
+    <div class="wrap">
+      <p class="kicker">Questions</p>
+      <h2 id="faq-h">Everything owners ask us.</h2>
+      <div class="faq">
+        <details><summary>Why no fridge or microwave?</summary><p>Most studio guests don’t cook, and leaving them out keeps your price lower. Add them and we install them the same day.</p></details>
+        <details><summary>Can I change items?</summary><p>Yes, within the palette. Swap the chair, choose a different pendant, change the art. We keep the room coherent.</p></details>
+        <details><summary>Can I see it before you order?</summary><p>Yes. You approve the design plan with the actual items before anything is bought.</p></details>
+        <details><summary>What if something arrives damaged?</summary><p>We replace it. Every appliance carries its manufacturer warranty, registered in your name.</p></details>
+        <details><summary>Will it fit my studio?</summary><p>Send measurements with your photos. If the room is tight we adjust the layout, or suggest a smaller bed.</p></details>
+        <details><summary>Do you do 1BHK and villas?</summary><p>Yes. The Drop comes in Studio, Villa and Estate. Tell us the property and we’ll quote it.</p></details>
+        <details><summary>I want you to run it too.</summary><p>That’s Red Flag Outpost Classic — we design, brand, launch and operate it for 8% of bookings. Join within 90 days and we deduct what you spent on The Drop from the Outpost setup fee.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec deep order" id="order" aria-labelledby="order-h">
+    <div class="wrap">
+      <p class="kicker">Order yours</p>
+      <h2 id="order-h">A price in 24 hours. A finished room in fifteen days.</h2>
+      <p class="lede">Send photos of the studio and its measurements. That’s all we need to start.</p>
+      <div class="row">
+        <a class="btn btn-pay" href="mailto:hello@redflaghomes.in?subject=The%20Drop%20%E2%80%94%20Studio%20Noir&amp;body=Photos%20and%20measurements%20attached.">Send photos and measurements</a>
+        <a class="btn btn-ghost js-pdf" href="TheDrop_Studio_Noir.pdf" download="TheDrop_Studio_Noir.pdf">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg>
+          Download the brochure (PDF)
+        </a>
+      </div>
+      <p class="mini">Core <b>₹2,09,000</b> · Full Noir <b>₹2,79,000</b> · 35% off · free Red Flag gift · 10% to book · plus GST</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <a class="big" href="https://redflaghomes.in">redflaghomes.in</a>
+    <div><a href="mailto:hello@redflaghomes.in">hello@redflaghomes.in</a> · The Drop by Red Flag · Studio · Villa · Estate</div>
+    <div>Red Flag Homes Network · a company of Red Flag World Holdings Ltd, London</div>
+    <p class="legal">Prices plus applicable GST, for studios up to 350 sq ft in our delivery cities. Sizes are standard and may vary slightly by supplier. Specific items may be substituted for equivalents of the same quality and palette where stock requires it — the design plan you approve is what we deliver. Images marked “Sample image” are for illustration.</p>
+  </div>
+</footer>
 
 <script>
 (function () {
@@ -504,15 +1017,22 @@ h1 span:nth-child(3){transition-delay:140ms}
   }, { passive: true });
 
   /* ---- links: put your real ones here ---- */
-  var RAZORPAY = '';   // e.g. 'https://rzp.io/l/xxxxxxxx'
-  var PDF = '';        // e.g. '/TheDrop_Studio_Noir.pdf'
+  var RAZORPAY = '';        // Core, 10% booking — e.g. 'https://rzp.io/l/xxxxxxxx'
+  var RAZORPAY_FULL = '';   // Full Noir, 10% booking
+  var PDF = 'TheDrop_Studio_Noir.pdf';
   var pay = document.getElementById('pay'), pdf = document.getElementById('pdf');
-  if (RAZORPAY) { pay.href = RAZORPAY; } else {
-    pay.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
+  function wirePay(a, url) {
+    if (url) { a.href = url; return; }
+    a.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
   }
-  if (PDF) { pdf.href = PDF; } else {
-    pdf.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Brochure link not set yet.'; });
-  }
+  wirePay(pay, RAZORPAY);
+  [].slice.call(document.querySelectorAll('[data-pay]')).forEach(function (a) {
+    wirePay(a, a.getAttribute('data-pay') === 'full' ? RAZORPAY_FULL : RAZORPAY);
+  });
+  [pdf].concat([].slice.call(document.querySelectorAll('.js-pdf'))).forEach(function (a) {
+    a.href = PDF;
+    a.setAttribute('download', PDF.split('/').pop());
+  });
 })();
 </script>
 </body>
