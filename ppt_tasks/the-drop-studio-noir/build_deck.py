@@ -27,7 +27,7 @@ LOGO = str(ROOT / "logobg.png")
 
 SERIF, SANS = "Cormorant Garamond", "Plus Jakarta Sans"
 W, H, M = 13.333, 7.5, 0.75
-TOTAL = 17
+TOTAL = 18
 
 NOIR = {"bg": "#151311", "paper": "#201C19", "ink": "#EFE6D8", "body": "#CFC5B6", "muted": "#958A7B",
         "hair": "#39322B"}
@@ -45,7 +45,7 @@ class Deck:
         self.plan = {}
 
     def col(self, key):
-        return self.pal.get(key) or ACC[key]
+        return key if key.startswith("#") else (self.pal.get(key) or ACC[key])
 
     @property
     def C(self):
@@ -196,7 +196,7 @@ def build():
     label(s, M, 2.25, 6, "Red Flag Homes Network  ·  The Drop")
     H1(s, M, 2.5, 6.4, 1.6, "The Drop", size=104, leading=0.85)
     H1(s, M, 3.95, 6, 0.8, "Studio · Noir", size=40, italic=True, color="caramel")
-    T(s, M, 4.95, 5.6, 0.8, "One room. One delivery.\nGuest-ready in ten days.", size=15, color="ink",
+    T(s, M, 4.95, 5.6, 0.8, "One room. One delivery.\nGuest-ready in fifteen days.", size=15, color="ink",
       leading=1.35)
     d.rule(s, M, 6.3, 5.4, "caramel")
     label(s, M, 6.45, 6, "85+ pieces  ·  delivered  ·  installed  ·  photographed", color="brass", size=7.5)
@@ -205,7 +205,7 @@ def build():
     s = d.slide(light=True, transition=("morph", False))
     d.photo(s, 8.4, 0, W - 8.4, H, "dark_bedroom", anchor=0.5)
     label(s, M, 1.15, 6, "What this is")
-    H1(s, M, 1.45, 7.4, 1.7, "Ten days after you order, your studio looks like a boutique hotel room.",
+    H1(s, M, 1.45, 7.4, 1.7, "Fifteen days after you book, your studio looks like a boutique hotel room.",
        size=33, leading=1.0)
     T(s, M, 3.3, 7.0, 0.8, "You have a studio with an AC, a fan, a wardrobe and white tubelights. "
       "We turn it into a room that is ready to take bookings.", size=12.5, color="body", leading=1.45)
@@ -383,6 +383,9 @@ def build():
         badge = d.box(s, x + 0.35, top + 0.35, 1.15, 0.34, "red", round_=True, radius=0.5)
         T(s, x + 0.35, top + 0.41, 1.15, 0.25, "35% OFF", size=8.5, color="white", bold=True, align="center",
           spacing=150)
+        d.box(s, x + 1.6, top + 0.35, 1.95, 0.34, "brass", round_=True, radius=0.5)
+        T(s, x + 1.6, top + 0.41, 1.95, 0.25, "+ FREE RED FLAG GIFT", size=8, color="black", bold=True,
+          align="center", spacing=100)
         H1(s, x + 0.35, top + 0.82, 3.5, 0.6, name, size=30, italic=i == 1, color="brass" if i == 1 else "ink")
         T(s, x + 0.35, top + 1.45, 3.4, 0.35, was, size=15, color="muted", strike=True)
         H1(s, x + 0.35, top + 1.72, 3.6, 0.8, now, size=46, color="ink", leading=0.9)
@@ -395,6 +398,34 @@ def build():
         T(s, x + 0.35, top + 4.02, 3.6, 0.3, when, size=9, color="caramel", italic=True)
     T(s, M, 6.78, 11.8, 0.25, "Plus applicable GST. For studios up to 350 sq ft. Delivery and installation included in Goa, "
       "Mumbai, Bengaluru, Delhi NCR and Lucknow; outside these, at cost.", size=7.5, color="muted")
+
+    # 12 — The gift ------------------------------------------------------------------------------------
+    s = d.slide(transition=("fade", True))
+    px, py, pw, ph = M + 0.2, 2.2, 5.4, 2.6          # the brass name plate, drawn natively
+    d.box(s, M, 1.1, 5.8, 5.6, "paper")
+    plate = d.box(s, px, py, pw, ph, "brass", line="#E2C48E", round_=True, radius=0.05)
+    plate.name = "static-plate"
+    d.box(s, px + 0.18, py + 0.18, pw - 0.36, ph - 0.36, "brass", line="#8E6C3A", round_=True, radius=0.04).name = "static-plate"
+    for sx, sy in ((px + 0.35, py + 0.35), (px + pw - 0.5, py + 0.35), (px + 0.35, py + ph - 0.5), (px + pw - 0.5, py + ph - 0.5)):
+        oval(s, sx, sy, 0.15, 0.15, "#7A5C2E", C=d.C).name = "static-screw"
+    T(s, px, py + 0.75, pw, 0.4, "RED FLAG  ×", size=15, color="black", bold=True, align="center", spacing=500)
+    H1(s, px, py + 1.2, pw, 0.8, "Your Property", size=40, color="black", align="center", italic=True)
+    T(s, M, 5.3, 5.8, 0.3, "Branded brass name plate", size=10, color="muted", align="center", italic=True)
+    x0 = 7.2
+    label(s, x0, 1.1, 6, "Free with both packages", color="brass")
+    H1(s, x0, 1.4, W - M - x0, 1.4, "A welcome gift\nfrom Red Flag Homes.", size=38, leading=0.98)
+    gifts = [("Branded brass name plate", "Engraved, for your front door"),
+             ("Branded tissues", "For the room and the bathroom"),
+             ("Branded slippers", "Waiting by the bed for every guest"),
+             ("Branded glass water bottles", "On the bedside, ready for check-in")]
+    for i, (k, v) in enumerate(gifts):
+        y = 3.05 + i * 0.85
+        d.rule(s, x0, y, W - M - x0)
+        T(s, x0, y + 0.16, 0.6, 0.4, f"0{i + 1}", size=12, color="brass", bold=True)
+        H1(s, x0 + 0.7, y + 0.1, W - M - x0 - 0.7, 0.4, k, size=20, color="ink")
+        T(s, x0 + 0.7, y + 0.5, W - M - x0 - 0.7, 0.3, v, size=10, color="muted")
+    d.rule(s, x0, 3.05 + 4 * 0.85, W - M - x0)
+    T(s, x0, 6.62, W - M - x0, 0.3, "Included free with Core and Full Noir.", size=10.5, color="caramel", bold=True)
 
     # 12 — Add what you need (oatmeal) ------------------------------------------------------------------
     s = d.slide(light=True)
@@ -436,22 +467,29 @@ def build():
     # 14 — How it works ------------------------------------------------------------------------------
     s = d.slide(light=True)
     label(s, M, 1.1, 6, "How it works")
-    H1(s, M, 1.4, 11, 0.9, "Ten days from your advance to a bookable room.", size=38)
-    steps = [("Day 0", "You send photos and measurements. We confirm the price within 24 hours."),
-             ("Day 1", "You pay 50%, approve the design plan, and we start sourcing."),
-             ("Day 2–8", "Everything is made and collected at our end. Nothing lands at your door piecemeal."),
-             ("Day 9", "Install day. We assemble, place, hang and style the entire room."),
-             ("Day 10", "Deep clean, professional shoot, balance 50%. Images sent that evening.")]
-    sw_ = (W - 2 * M) / 5
-    d.rule(s, M, 3.1, W - 2 * M, "ink", 0.016)
-    for i, (dday, txt) in enumerate(steps):
+    H1(s, M, 1.4, 11, 0.9, "Fifteen days from booking to a bookable room.", size=38)
+    steps = [("Day 0", "Send photos and measurements. We confirm the price within 24 hours.", "10% to book"),
+             ("Day 1", "Approve the design plan with the actual items. Sourcing starts.", "30%"),
+             ("Day 2–12", "Everything is made and collected at our end. Nothing lands at your door piecemeal.",
+              "30% by day 7"),
+             ("Day 13", "Everything is packed and dispatched to your studio.", "30% before delivery"),
+             ("Day 14", "Install day. We assemble, place, hang and style the entire room.", None),
+             ("Day 15", "Deep clean and professional shoot. Images sent that evening.", "Nothing to pay")]
+    sw_ = (W - 2 * M) / 6
+    d.rule(s, M, 2.85, W - 2 * M, "ink", 0.016)
+    for i, (dday, txt, pay) in enumerate(steps):
         x = M + i * sw_
-        oval(s, x, 3.0, 0.22, 0.22, ACC["red"] if i == 4 else ACC["caramel"], C=d.C)
-        H1(s, x, 3.5, sw_ - 0.2, 0.7, dday, size=34, color="ink")
-        T(s, x, 4.35, sw_ - 0.35, 1.8, txt, size=10.5, color="body", leading=1.45)
+        oval(s, x, 2.75, 0.22, 0.22, ACC["red"] if i == 5 else ACC["caramel"], C=d.C)
+        T(s, x, 3.25, sw_ - 0.15, 0.5, dday, size=21, color="ink", bold=True)
+        T(s, x, 3.9, sw_ - 0.3, 1.5, txt, size=10, color="body", leading=1.45)
+        if pay:
+            fill = "ink" if i == 0 else ("caramel" if pay.startswith("30") else "paper")
+            d.box(s, x, 5.35, sw_ - 0.25, 0.36, fill, round_=True, radius=0.5)
+            T(s, x, 5.42, sw_ - 0.25, 0.25, pay, size=8.5, color="bg" if fill == "ink" else
+              ("white" if fill == "caramel" else "ink"), bold=True, align="center")
     d.box(s, M, 6.1, W - 2 * M, 0.55, "ink")
-    T(s, M + 0.3, 6.25, 11, 0.3, "50% to start  ·  50% on day 10, when the room is finished and photographed",
-      size=10.5, color="bg", bold=True)
+    T(s, M + 0.3, 6.25, 11.5, 0.3, "10% to book  ·  the balance in three equal parts, all before delivery  ·  "
+      "nothing to pay on handover day", size=10.5, color="bg", bold=True)
 
     # 15 — Questions --------------------------------------------------------------------------------
     s = d.slide()
@@ -477,7 +515,7 @@ def build():
     d.photo(s, 7.6, 0, W - 7.6, H, "sample_kitchen", anchor=0.4, tag=SAMPLE)
     d.mask(s, 7.6, 0, 1.3, H, "right")
     label(s, M, 1.1, 6, "Order yours")
-    H1(s, M, 1.4, 6.6, 2.2, "A price in 24 hours.\nA finished room\nin ten days.", size=46, leading=0.98)
+    H1(s, M, 1.4, 6.6, 2.2, "A price in 24 hours.\nA finished room\nin fifteen days.", size=46, leading=0.98)
     T(s, M, 3.95, 6.2, 0.8, "Send photos of the studio and its measurements. That’s all we need to start.",
       size=13, color="body", leading=1.45)
     for i, (now, was, n) in enumerate((("₹2,09,000", "₹3,21,538", "Core"), ("₹2,79,000", "₹4,29,231", "Full Noir"))):
@@ -485,7 +523,7 @@ def build():
         label(s, x, 4.9, 3, n, color="brass")
         T(s, x, 5.18, 2.9, 0.3, was, size=11, color="muted", strike=True)
         H1(s, x, 5.42, 3.0, 0.6, now, size=32, color="ink")
-    T(s, M, 6.2, 6.4, 0.3, "35% off  ·  plus GST", size=9, color="red", bold=True, spacing=150)
+    T(s, M, 6.2, 6.4, 0.3, "35% off  ·  free Red Flag gift  ·  10% to book  ·  plus GST", size=9, color="red", bold=True, spacing=150)
 
     # 17 — Contact ----------------------------------------------------------------------------------
     s = d.slide(chrome=False, transition=("morph", False))
