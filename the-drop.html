@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
 <title>The Drop — Red Flag Homes Network</title>
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,15 +19,15 @@
   --slow:cubic-bezier(0.65,0,0.35,1);
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
-html,body{margin:0;background:#000;color:#fff;overflow-x:clip}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:#000;color:#fff;overflow-x:clip;overscroll-behavior:none}
 body{font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:rgba(255,255,255,.2)}
 :focus-visible{outline:2px solid #fff;outline-offset:3px}
 a{color:inherit}
 
 /* ── stage ─────────────────────────────────────────────── */
-.stage{position:relative;isolation:isolate;width:100%;min-height:100vh;min-height:100dvh;
+.stage{position:relative;isolation:isolate;width:100%;min-height:100vh;min-height:100svh;
   overflow:hidden;background:#000;display:flex;flex-direction:column;
   padding:calc(96px + env(safe-area-inset-top,0px)) 20px calc(26px + env(safe-area-inset-bottom,0px))}
 
@@ -238,175 +239,52 @@ h1 span:nth-child(3){transition-delay:140ms}
 .stage.picked .cell.on{position:absolute;inset:0;margin:auto;width:200px;border:0;
   transition:opacity 420ms var(--ease),filter 420ms var(--ease)}
 @media (max-width:700px){.stage.picked .cell.on{width:196px;height:60px}}
+.cell{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 
-/* ── sections below the hero ───────────────────────────── */
-.sec{--ink:#12100e;--cream:#ede6da;--brass:#c9955f;--brass-deep:#8a5529;
-  position:relative;background:var(--ink);color:#fff;padding:clamp(72px,10vw,128px) clamp(20px,5vw,48px)}
-.sec.cream{background:var(--cream);color:#1c1916}
-.sec.deep{background:#0b0908}
-.wrap{max-width:1160px;margin:0 auto}
-.kicker{margin:0 0 18px;font-size:11px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--brass)}
-.cream .kicker{color:var(--brass-deep)}
-.sec h2{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.02em;max-width:18ch}
-.sec h3{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(22px,2.4vw,28px);line-height:1.15;letter-spacing:-.01em}
-.lede{margin:22px 0 0;max-width:58ch;font-size:clamp(15px,1.3vw,17px);line-height:1.6;color:rgba(255,255,255,.72)}
-.cream .lede{color:rgb(28 25 22 / .72)}
-.fine{margin:28px 0 0;font-size:12.5px;line-height:1.6;color:rgba(255,255,255,.5)}
-.cream .fine{color:rgb(28 25 22 / .58)}
+/* ── WebGL scene: above the CSS scene, below grain, scrim and every control ── */
+#gl{position:absolute;inset:0;z-index:0;width:100%;height:100%;display:block;pointer-events:none;
+  opacity:0;transition:opacity 500ms var(--ease)}
+.stage.gl-on #gl{opacity:1}
+.stage.gl-live .scene{visibility:hidden;animation-play-state:paused}
+.stage.paused .scene{animation-play-state:paused}
+/* stand-in photo, graded per stage, until the five real plates exist */
+.m-base img.standin{filter:grayscale(1) brightness(1.45) contrast(.62)}
+.m-room img.standin{filter:grayscale(.55) brightness(1.1) contrast(.86) hue-rotate(-10deg)}
+.m-light img.standin{filter:sepia(.18) saturate(1.05)}
+.m-style img.standin{filter:sepia(.1) saturate(1.2) contrast(1.05)}
+.m-shoot img.standin{filter:saturate(1.25) contrast(1.14) brightness(1.06)}
 
-/* what this is */
-.ones{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,3vw,40px);margin:48px 0 0;padding:0;list-style:none}
-.ones li{border-top:1px solid rgb(28 25 22 / .18);padding-top:18px;font-size:13px;color:rgb(28 25 22 / .65)}
-.ones b{display:block;margin-bottom:4px;font:italic 400 clamp(30px,3.4vw,42px)/1 'Instrument Serif',serif;color:var(--brass-deep)}
-.nos{margin:40px 0 0;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#b3241c;line-height:1.9}
+/* returning visitor: restore without replaying the collapse choreography */
+.stage.instant .controller,.stage.instant .controller *,.stage.instant .controller *::before,.stage.instant .controller *::after,
+.stage.instant h1 span,.stage.instant .sub,.stage.instant .caption{transition:none!important;animation:none!important}
+/* sits in the gap above the controller, which is empty while a stage is shown */
+.resume{--gap:clamp(28px,5vh,56px);position:relative;z-index:20;height:0;flex:none}
+.resume span{position:absolute;left:0;right:0;top:calc((var(--gap) - 18px) / 2);text-align:center;
+  font-size:12px;line-height:18px;letter-spacing:.02em;color:rgba(255,255,255,.66);text-shadow:0 1px 6px rgb(0 0 0 / .4);
+  opacity:0;transition:opacity 700ms var(--ease);pointer-events:none}
+.resume.show span{opacity:1}
+@media (max-width:700px){.resume{--gap:clamp(22px,4vh,40px)}}
+@media (max-height:700px){.resume{--gap:22px}}
 
-/* picture your studio */
-.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.6vw,20px);margin:48px 0 0}
-.shot{margin:0}
-.shot-img{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;
-  background:radial-gradient(90% 70% at 55% 30%,#4a3a2c 0%,#1e1814 60%,#0d0b0a 100%)}
-.shot-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.shot .tag{position:absolute;left:12px;bottom:12px;font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
-  color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgb(0 0 0 / .6)}
-.shot figcaption{margin-top:14px;font:italic 400 19px/1.3 'Instrument Serif',serif;color:rgba(255,255,255,.82)}
-
-/* the look + light */
-.look{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(40px,6vw,96px);align-items:start}
-.swatches{display:flex;flex-wrap:wrap;gap:18px 22px;margin:36px 0 0;padding:0;list-style:none}
-.swatches li{display:grid;justify-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.6);width:64px;text-align:center}
-.swatches i{width:44px;height:44px;border-radius:50%;border:1px solid rgb(255 255 255 / .16)}
-.ticks{margin:30px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72)}
-.ticks li::before{content:"— ";color:var(--brass)}
-.kelvin{border-left:1px solid rgb(255 255 255 / .12);padding-left:clamp(24px,4vw,56px)}
-.kelvin .big{display:block;margin:10px 0 6px;font:400 clamp(64px,8vw,104px)/.9 'Instrument Serif',serif;letter-spacing:-.03em;color:var(--brass)}
-.kelvin .unit{font-size:13px;color:rgba(255,255,255,.6)}
-
-/* included */
-.groups{display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(28px,4vw,64px);margin:44px 0 0}
-.group{border-top:1px solid rgb(28 25 22 / .18)}
-.group summary{display:flex;align-items:center;gap:16px;min-height:60px;padding:14px 0;cursor:pointer;list-style:none;
-  font:400 22px/1.2 'Instrument Serif',serif}
-.group summary::-webkit-details-marker{display:none}
-.group summary span{margin-left:auto;font:500 12px 'Manrope',sans-serif;color:rgb(28 25 22 / .55);white-space:nowrap}
-.group summary::after{content:"+";font:400 22px/1 'Manrope',sans-serif;color:var(--brass-deep);transition:transform 300ms var(--ease)}
-.group[open] summary::after{transform:rotate(45deg)}
-.group summary:focus-visible{outline:2px solid #1c1916;outline-offset:2px}
-.items{margin:0 0 20px;padding:0;list-style:none;font-size:14px;line-height:1.45}
-.items li{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgb(28 25 22 / .08)}
-.items li span:last-child{flex:none;color:var(--brass-deep);font-variant-numeric:tabular-nums;text-align:right}
-.note{margin:36px 0 0;padding:20px 22px;border-radius:6px;background:rgb(28 25 22 / .06);font-size:14px;line-height:1.55;color:rgb(28 25 22 / .75);max-width:640px}
-.note b{display:block;margin-bottom:4px;font:400 20px 'Instrument Serif',serif;color:#1c1916}
-
-/* service */
-.steps{margin:44px 0 0;padding:0;list-style:none;border-top:1px solid rgb(255 255 255 / .12)}
-.steps li{display:grid;grid-template-columns:minmax(180px,1fr) 2fr;gap:24px;padding:22px 0;border-bottom:1px solid rgb(255 255 255 / .12);align-items:baseline}
-.steps b{font:400 24px/1.2 'Instrument Serif',serif}
-.steps span{font-size:15px;line-height:1.55;color:rgba(255,255,255,.7)}
-.pull{margin:40px 0 0;font:italic 400 clamp(20px,2.2vw,26px)/1.35 'Instrument Serif',serif;color:var(--brass);max-width:40ch}
-
-/* pricing */
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2vw,24px);margin:48px 0 0}
-.plan{display:flex;flex-direction:column;padding:clamp(24px,3vw,36px);border-radius:10px;background:#16130f;border:1px solid rgb(255 255 255 / .1)}
-.plan.best{border-color:rgb(201 149 95 / .7);background:linear-gradient(180deg,#1d1812,#16130f)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.1em}
-.chip.red{background:var(--red);color:#fff}
-.chip.gold{background:rgb(201 149 95 / .18);color:#e6bc8f}
-.plan h3{margin-top:22px;font-size:clamp(28px,3vw,36px)}
-.plan .was{margin:14px 0 0;font-size:14px;color:rgba(255,255,255,.42);text-decoration:line-through}
-.plan .now{margin:2px 0 0;font:400 clamp(38px,4.4vw,52px)/1 'Instrument Serif',serif}
-.plan .gst{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.5)}
-.plan ul{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;line-height:1.45}
-.plan li{display:grid;grid-template-columns:18px 1fr;gap:8px;color:rgba(255,255,255,.85)}
-.plan li.no{color:rgba(255,255,255,.4)}
-.plan li::before{content:"✓";color:var(--brass)}
-.plan li.no::before{content:"—";color:rgba(255,255,255,.3)}
-.plan .fit{margin:22px 0 26px;font:italic 400 17px/1.4 'Instrument Serif',serif;color:rgba(255,255,255,.7)}
-.plan .btn{margin-top:auto;width:100%}
-
-/* gift */
-.gift{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(36px,6vw,96px);align-items:center}
-.plate{position:relative;aspect-ratio:16/10;border-radius:10px;display:grid;place-content:center;text-align:center;
-  background:linear-gradient(135deg,#d7b27c,#b88a52 45%,#e2c28f 70%,#a97b45);
-  box-shadow:0 30px 60px rgb(60 40 20 / .28),inset 0 1px 0 rgb(255 255 255 / .5),inset 0 -2px 6px rgb(80 50 20 / .35)}
-.plate::before{content:"";position:absolute;inset:14px;border:1px solid rgb(70 45 20 / .35);border-radius:4px}
-.plate small{font-size:12px;font-weight:700;letter-spacing:.34em;color:#3d2912}
-.plate em{display:block;margin-top:8px;font:italic 400 clamp(28px,3.4vw,40px)/1 'Instrument Serif',serif;color:#2e1f0e}
-.plate + p{margin:12px 0 0;text-align:center;font-size:12px;color:rgb(28 25 22 / .55)}
-.gifts{margin:32px 0 0;padding:0;list-style:none;border-top:1px solid rgb(28 25 22 / .16)}
-.gifts li{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:16px 0;border-bottom:1px solid rgb(28 25 22 / .16)}
-.gifts li > span{grid-row:span 2;font-size:12px;font-weight:600;color:var(--brass-deep);padding-top:5px}
-.gifts b{font:400 21px/1.2 'Instrument Serif',serif}
-.gifts small{font-size:13px;color:rgb(28 25 22 / .6)}
-
-/* add-ons + not included */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,96px)}
-.prices{margin:32px 0 0;padding:0;list-style:none}
-.prices li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgb(255 255 255 / .1);font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.82)}
-.prices li span:last-child{flex:none;color:var(--brass);font-variant-numeric:tabular-nums}
-.nots{margin:32px 0 0;padding:0;list-style:none}
-.nots li{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:12px 0;border-bottom:1px solid rgb(255 255 255 / .1);font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.78)}
-.nots li::before{content:"✕";color:var(--red);font-size:12px;padding-top:2px}
-
-/* timeline */
-.days{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin:52px 0 0;padding:0;list-style:none}
-.days li{position:relative;padding:28px 16px 0 0;border-top:1px solid rgb(28 25 22 / .22)}
-.days li::before{content:"";position:absolute;top:-6px;left:0;width:11px;height:11px;border-radius:50%;background:var(--brass-deep)}
-.days li:last-child::before{background:var(--red)}
-.days b{display:block;font:400 26px/1.1 'Instrument Serif',serif;margin-bottom:10px}
-.days p{margin:0;font-size:13.5px;line-height:1.5;color:rgb(28 25 22 / .7)}
-.days .pay{display:inline-block;margin-top:14px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgb(138 85 41 / .14);color:var(--brass-deep)}
-.days .pay.first{background:#1c1916;color:var(--cream)}
-.days .pay.none{background:rgb(28 25 22 / .07);color:rgb(28 25 22 / .6)}
-.paybar{margin:44px 0 0;padding:16px 20px;border-radius:6px;background:#1c1916;color:var(--cream);font-size:13.5px;line-height:1.5}
-
-/* faq */
-.faq{margin:44px 0 0;border-top:1px solid rgb(255 255 255 / .12);max-width:880px}
-.faq details{border-bottom:1px solid rgb(255 255 255 / .12)}
-.faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:64px;padding:16px 0;cursor:pointer;list-style:none;
-  font:400 clamp(19px,2vw,23px)/1.3 'Instrument Serif',serif}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";flex:none;font:400 22px/1 'Manrope',sans-serif;color:var(--brass);transition:transform 300ms var(--ease)}
-.faq details[open] summary::after{transform:rotate(45deg)}
-.faq p{margin:0 0 22px;max-width:62ch;font-size:15px;line-height:1.6;color:rgba(255,255,255,.7)}
-
-/* order */
-.order{text-align:center}
-.order h2{margin:0 auto;max-width:16ch}
-.order .lede{margin-left:auto;margin-right:auto}
-.order .row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:36px 0 0}
-.order .mini{margin:26px 0 0;font-size:13px;color:rgba(255,255,255,.6)}
-.order .mini b{color:#fff;font-weight:600}
-.btn-ghost{background:transparent;color:#fff;border:1px solid rgb(255 255 255 / .28)}
-.btn-ghost:hover{background:rgb(255 255 255 / .08);border-color:rgb(255 255 255 / .5)}
-
-footer.site{background:#0b0908;color:rgba(255,255,255,.55);padding:56px clamp(20px,5vw,48px) calc(40px + env(safe-area-inset-bottom,0px));
-  border-top:1px solid rgb(255 255 255 / .08);font-size:12.5px;line-height:1.6}
-footer.site .wrap{display:grid;gap:14px}
-footer.site .big{font:400 clamp(26px,3vw,34px)/1 'Instrument Serif',serif;color:#fff;text-decoration:none}
-footer.site a{color:rgba(255,255,255,.8)}
-footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
-
-@media (max-width:900px){
-  .look,.gift,.two{grid-template-columns:1fr}
-  .kelvin{border-left:0;padding-left:0;border-top:1px solid rgb(255 255 255 / .12);padding-top:32px}
-  .groups{grid-template-columns:1fr}
-  .days{grid-template-columns:1fr 1fr 1fr;row-gap:36px}
+/* Short screens (small phones, phones in landscape): everything still fits one screen, no scroll.
+   The price, CTAs, pill and controller keep their sizes; only the space around them tightens.
+   When a stage is shown the headline is invisible, so its caption takes the headline's slot. */
+@media (max-height:600px){
+  header{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:8px}
+  .stage{display:grid;grid-template-columns:100%;grid-template-rows:auto auto auto auto 1fr;
+    padding-top:calc(56px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .hero{grid-area:1 / 1;margin:0;display:flex;flex-direction:column;justify-content:flex-end}
+  .resume{grid-area:2 / 1;--gap:16px}
+  .resume span{font-size:11px;line-height:16px}
+  .controller{grid-area:3 / 1;margin-top:16px}
+  .caption{grid-area:4 / 1;margin-top:0;font-size:12px;line-height:1.4}
+  .stage.picked .caption{grid-area:1 / 1;align-self:end}
+  .foot{grid-area:5 / 1;align-self:end;margin:0 auto;padding-top:12px;gap:8px}
+  .eyebrow{display:none}
+  h1{font-size:clamp(34px,5.4vw,44px)}
 }
-@media (max-width:700px){
-  .ones{grid-template-columns:1fr;gap:18px}
-  .shots{--gut:clamp(20px,5vw,48px);display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;
-    margin-left:calc(-1 * var(--gut));margin-right:calc(-1 * var(--gut));padding:0 var(--gut) 6px;scroll-padding:0 var(--gut);scrollbar-width:none}
-  .shots::-webkit-scrollbar{display:none}
-  .shot{flex:0 0 82%;scroll-snap-align:start}
-  .plans{grid-template-columns:1fr}
-  .steps li{grid-template-columns:1fr;gap:6px}
-  .days{grid-template-columns:1fr;row-gap:0}
-  .days li{padding:0 0 28px 28px;border-top:0;border-left:1px solid rgb(28 25 22 / .22)}
-  .days li:last-child{border-left-color:transparent}
-  .days li::before{top:2px;left:-6px}
-  .order .row .btn{width:100%;max-width:360px}
-}
+@media (max-height:600px) and (max-width:700px){.hero{min-height:52px}}
+@media (max-height:600px) and (max-width:360px){.stage{padding-left:12px;padding-right:12px}}
 </style>
 </head>
 <body>
@@ -416,12 +294,13 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
   <!-- SCENE LAYERS — one photo (or <video muted playsinline loop src="…">) per stage.
        All five must be shot from the same tripod position, same lens, same dimensions, or the wipe breaks. -->
   <div class="scene" id="scene">
-    <div class="media m-base on" data-scene="base"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/01-base.jpg" alt="" fetchpriority="high" onerror="this.remove()"></div>
-    <div class="media m-room"  data-scene="room"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/02-room.jpg" alt="" onerror="this.remove()"></div>
-    <div class="media m-light" data-scene="light"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/03-lighting.jpg" alt="" onerror="this.remove()"></div>
-    <div class="media m-style" data-scene="style"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/04-styling.jpg" alt="" onerror="this.remove()"></div>
-    <div class="media m-shoot" data-scene="shoot"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/05-shoot.jpg" alt="" onerror="this.remove()"></div>
+    <div class="media m-base on" data-scene="base"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/01-base.jpg" alt="" crossorigin="anonymous" fetchpriority="high" onerror="this.remove()"></div>
+    <div class="media m-room"  data-scene="room"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/02-room.jpg" alt="" crossorigin="anonymous" onerror="this.remove()"></div>
+    <div class="media m-light" data-scene="light"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/03-lighting.jpg" alt="" crossorigin="anonymous" onerror="this.remove()"></div>
+    <div class="media m-style" data-scene="style"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/04-styling.jpg" alt="" crossorigin="anonymous" onerror="this.remove()"></div>
+    <div class="media m-shoot" data-scene="shoot"><img src="https://cdn.jsdelivr.net/gh/priyanshu777-hue/Red-Flag-Home-@main/drop/studio-noir/05-shoot.jpg" alt="" crossorigin="anonymous" onerror="this.remove()"></div>
   </div>
+  <canvas id="gl" aria-hidden="true"></canvas>
   <div class="grain"></div>
   <div class="scrim"></div>
 
@@ -430,6 +309,8 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     <h1><span>Studio</span> <span>·</span> <span>Noir</span></h1>
     <p class="sub">One room. One delivery. Guest-ready in fifteen days. 85+ pieces sourced, delivered, installed, styled and photographed — you unlock the door once and we hand it back finished.</p>
   </div>
+
+  <div class="resume" id="resume" aria-hidden="true"><span>Picking up where you left off</span></div>
 
   <div class="controller glass-wrap" id="controller" role="group" aria-label="See what changes">
     <div class="glass track" id="track" aria-hidden="true"></div>
@@ -478,344 +359,6 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
   <p class="sr" role="status" aria-live="polite" id="live"></p>
 </div>
 
-<main>
-  <section class="sec cream" id="what" aria-labelledby="what-h">
-    <div class="wrap">
-      <p class="kicker">What this is</p>
-      <h2 id="what-h">Fifteen days after you book, your studio looks like a boutique hotel room.</h2>
-      <p class="lede">You have a studio with an AC, a fan, a wardrobe and white tubelights. We turn it into a room that is ready to take bookings. We source everything, bring it, assemble it, style it, deep clean it and photograph it. You unlock the door once and we hand it back finished.</p>
-      <ul class="ones">
-        <li><b>One</b>order</li>
-        <li><b>One</b>delivery</li>
-        <li><b>One</b>install day</li>
-      </ul>
-      <p class="nos">No market trips · No fifteen deliveries · No carpenter who doesn’t turn up</p>
-    </div>
-  </section>
-
-  <section class="sec" id="look" aria-labelledby="look-h">
-    <div class="wrap">
-      <p class="kicker">Sample images · How your studio could look</p>
-      <h2 id="look-h">Picture your studio like this.</h2>
-      <div class="shots">
-        <figure class="shot">
-          <div class="shot-img">
-            <img src="drop/studio-noir/sample-living.jpg" alt="Sample Noir studio at night: charcoal sofa and coffee table, the bed behind a black-framed glass partition, a round table by the kitchenette" loading="lazy" decoding="async" onerror="this.remove()">
-            <span class="tag">Sample image</span>
-          </div>
-          <figcaption>Living, sleeping, dining</figcaption>
-        </figure>
-        <figure class="shot">
-          <div class="shot-img">
-            <img src="drop/studio-noir/sample-plan.jpg" alt="Sample studio seen from above: bed, work table, kitchen wall, wardrobe, sofa and shower room planned as one layout" loading="lazy" decoding="async" onerror="this.remove()">
-            <span class="tag">Sample image</span>
-          </div>
-          <figcaption>The whole studio, planned</figcaption>
-        </figure>
-        <figure class="shot">
-          <div class="shot-img">
-            <img src="drop/studio-noir/sample-kitchenette.jpg" alt="Sample Noir studio: black kitchenette with warm under-cabinet light, rattan pendant, bed with cream linen and plants" loading="lazy" decoding="async" onerror="this.remove()">
-            <span class="tag">Sample image</span>
-          </div>
-          <figcaption>Kitchenette and bed</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec deep" id="noir" aria-labelledby="noir-h">
-    <div class="wrap look">
-      <div>
-        <p class="kicker">The look</p>
-        <h2 id="noir-h">Noir is warm, not cold.</h2>
-        <ul class="swatches" aria-label="Palette">
-          <li><i style="background:#2b2927"></i>Charcoal</li>
-          <li><i style="background:#8a5a36"></i>Warm wood</li>
-          <li><i style="background:#e6dccb"></i>Cream &amp; oatmeal</li>
-          <li><i style="background:#141414"></i>Black metal</li>
-          <li><i style="background:#c49a5a"></i>Brass</li>
-          <li><i style="background:#7c8f6b"></i>Green</li>
-        </ul>
-        <ul class="ticks">
-          <li>Deep charcoal surfaces in matte — never gloss</li>
-          <li>Jute and wood texture to keep the room soft</li>
-          <li>Cream and oatmeal bedding layered over dark furniture</li>
-          <li>Black-framed art, terracotta pots, real plants, brass accents</li>
-        </ul>
-      </div>
-      <div class="kelvin">
-        <p class="kicker">The single biggest change</p>
-        <h3>It’s the light.</h3>
-        <span class="big">2700K</span>
-        <span class="unit">warm, in every fitting we install</span>
-        <p class="lede">White tubelights make any room photograph like a clinic. We light from lamps, sconces and a pendant instead of one ceiling tube — the difference between a dark room and an expensive one.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec cream" id="included" aria-labelledby="inc-h">
-    <div class="wrap">
-      <p class="kicker">Everything included, with sizes</p>
-      <h2 id="inc-h">85+ pieces. Every one of them sized.</h2>
-      <div class="groups">
-        <div>
-          <details class="group" open>
-            <summary>Sleep <span>8 items</span></summary>
-            <ul class="items">
-              <li><span>Queen bed frame with box storage, dark finish</span><span>78 × 60 in</span></li>
-              <li><span>Medium-firm mattress</span><span>78 × 60 × 6 in</span></li>
-              <li><span>Mattress protectors</span><span>78 × 60 in</span></li>
-              <li><span>Pillows — soft and firm, with protectors</span><span>18 × 28 in</span></li>
-              <li><span>Full linen sets — fitted, flat, pillow covers, 300TC</span><span>Flat 90 × 108 in</span></li>
-              <li><span>Knit throw and waffle throw</span><span>50 × 60 in</span></li>
-              <li><span>Cushion covers with inserts</span><span>45 × 45 cm</span></li>
-              <li><span>Black metal bedside tables</span><span>40 × 40 × 55 cm</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Furniture <span>4 items</span></summary>
-            <ul class="items">
-              <li><span>Console or open shelf unit, black metal and wood</span><span>100 × 35 × 75 cm</span></li>
-              <li><span>Accent chair, cane or wishbone style</span><span>55 × 55 × 80 cm</span></li>
-              <li><span>Round side table, dark wood</span><span>45 cm dia</span></li>
-              <li><span>Full-length mirror, black frame</span><span>150 × 40 cm</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Floor and windows <span>2 items</span></summary>
-            <ul class="items">
-              <li><span>Jute rug under the bed</span><span>6 × 4 ft</span></li>
-              <li><span>Blackout curtains, oatmeal, with black rod</span><span>4.5 × 9 ft panels</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Kitchenette <span>7 items</span></summary>
-            <ul class="items">
-              <li><span>Induction hob</span><span>2000 W</span></li>
-              <li><span>Electric kettle</span><span>1.5 L</span></li>
-              <li><span>Crockery, cutlery and glassware for two</span><span>—</span></li>
-              <li><span>Pan and pot</span><span>24 cm · 2 L</span></li>
-              <li><span>Chopping board and knife</span><span>30 × 20 cm</span></li>
-              <li><span>Storage jars, tea and coffee station on a brass tray</span><span>35 cm tray</span></li>
-              <li><span>Dish rack and bin</span><span>—</span></li>
-            </ul>
-          </details>
-        </div>
-        <div>
-          <details class="group" open>
-            <summary>Lighting <span>6 items</span></summary>
-            <ul class="items">
-              <li><span>Rattan or smoked-glass pendant over the bed</span><span>40 cm dia</span></li>
-              <li><span>Black metal wall sconces with brass inner</span><span>15 × 25 cm</span></li>
-              <li><span>Table lamp with amber shade</span><span>35 cm high</span></li>
-              <li><span>Slim black floor lamp</span><span>150 cm high</span></li>
-              <li><span>Under-cabinet warm LED strip</span><span>1 m</span></li>
-              <li><span>Warm 2700K bulbs throughout, plus a night light</span><span>2700K</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Bathroom <span>8 items</span></summary>
-            <ul class="items">
-              <li><span>Bath towels</span><span>75 × 150 cm</span></li>
-              <li><span>Hand towels and face towels</span><span>40 × 60 · 30 × 30 cm</span></li>
-              <li><span>Bath mats</span><span>50 × 80 cm</span></li>
-              <li><span>Refillable dispensers — shampoo, conditioner, body wash, hand wash</span><span>300 ml</span></li>
-              <li><span>Mirror, shelf, towel rail and hooks</span><span>60 × 80 cm mirror</span></li>
-              <li><span>Bin, toilet brush, bucket and mug</span><span>—</span></li>
-              <li><span>Hair dryer</span><span>1200 W</span></li>
-              <li><span>Upgraded shower head</span><span>—</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Safety, utility and access <span>5 items</span></summary>
-            <ul class="items">
-              <li><span>Keyless smart lock — fingerprint, PIN and key backup</span><span>Fits 35–60 mm doors</span></li>
-              <li><span>Water purifier</span><span>7 L RO</span></li>
-              <li><span>Smoke alarm, fire extinguisher, fire blanket, first-aid kit</span><span>2 kg ABC</span></li>
-              <li><span>Iron and board, drying rack, laundry basket</span><span>—</span></li>
-              <li><span>Hangers, extension boards, cleaning set</span><span>4-socket</span></li>
-            </ul>
-          </details>
-          <details class="group">
-            <summary>Styling and welcome <span>5 items</span></summary>
-            <ul class="items">
-              <li><span>Framed prints, black frames</span><span>A2 · 42 × 59 cm</span></li>
-              <li><span>Plants in pots, plus a woven basket planter</span><span>60–120 cm</span></li>
-              <li><span>Tray, vase, books, candle and coasters, styled on the day</span><span>—</span></li>
-              <li><span>Scent diffuser with first refill</span><span>200 ml</span></li>
-              <li><span>Welcome basket and a printed house guide</span><span>A5, bound</span></li>
-            </ul>
-          </details>
-        </div>
-      </div>
-      <p class="note"><b>Fridge and microwave?</b>Not included as standard — most studios don’t need them, and it keeps your price down. Add either as an add-on if you want them.</p>
-    </div>
-  </section>
-
-  <section class="sec" id="service" aria-labelledby="svc-h">
-    <div class="wrap">
-      <p class="kicker">And the part nobody else does</p>
-      <h2 id="svc-h">Not a kit. A finished room.</h2>
-      <ul class="steps">
-        <li><b>Design plan</b><span>A full layout before anything is ordered, so the room works as a whole.</span></li>
-        <li><b>Sourcing and delivery</b><span>One order, one contact — not fifteen sellers.</span></li>
-        <li><b>Full install day</b><span>Assembled, hung, placed and styled by our team.</span></li>
-        <li><b>Deep clean</b><span>Guest-ready, not builder-dusty.</span></li>
-        <li><b>Professional shoot</b><span>20+ edited images, ready to upload the same evening.</span></li>
-      </ul>
-      <p class="pull">Photographs are 80% of the booking decision. A kit without a shoot is half a job.</p>
-    </div>
-  </section>
-
-  <section class="sec deep" id="pricing" aria-labelledby="price-h">
-    <div class="wrap">
-      <p class="kicker">Two versions</p>
-      <h2 id="price-h">Choose your Noir.</h2>
-      <div class="plans">
-        <article class="plan">
-          <div class="chips"><span class="chip red">35% OFF</span><span class="chip gold">+ FREE RED FLAG GIFT</span></div>
-          <h3>Core</h3>
-          <p class="was">₹3,21,538</p>
-          <p class="now">₹2,09,000</p>
-          <p class="gst">plus GST · ₹20,900 to book</p>
-          <ul>
-            <li>Everything on this page</li>
-            <li class="no">Charcoal matte paint, two walls</li>
-            <li class="no">Warm wood vinyl plank flooring</li>
-            <li class="no">Wardrobe refinished in matte black</li>
-          </ul>
-          <p class="fit">If your floor and walls are already presentable.</p>
-          <a class="btn btn-pay" data-pay="core" href="#" target="_blank" rel="noopener">Pay 10% and book Core</a>
-        </article>
-        <article class="plan best">
-          <div class="chips"><span class="chip red">35% OFF</span><span class="chip gold">+ FREE RED FLAG GIFT</span></div>
-          <h3>Full Noir</h3>
-          <p class="was">₹4,29,231</p>
-          <p class="now">₹2,79,000</p>
-          <p class="gst">plus GST · ₹27,900 to book</p>
-          <ul>
-            <li>Everything on this page</li>
-            <li>Charcoal matte paint, two walls</li>
-            <li>Warm wood vinyl plank flooring</li>
-            <li>Wardrobe refinished in matte black</li>
-          </ul>
-          <p class="fit">If the room still looks like a builder handed it over.</p>
-          <a class="btn btn-pay" data-pay="full" href="#" target="_blank" rel="noopener">Pay 10% and book Full Noir</a>
-        </article>
-      </div>
-      <p class="fine">Plus applicable GST. For studios up to 350 sq ft. Delivery and installation included in Goa, Mumbai, Bengaluru, Delhi NCR and Lucknow; outside these, at cost.</p>
-    </div>
-  </section>
-
-  <section class="sec cream" id="gift" aria-labelledby="gift-h">
-    <div class="wrap gift">
-      <div>
-        <div class="plate" aria-hidden="true"><small>RED FLAG ×</small><em>Your Property</em></div>
-        <p>Branded brass name plate</p>
-      </div>
-      <div>
-        <p class="kicker">Free with both packages</p>
-        <h2 id="gift-h">A welcome gift from Red Flag Homes.</h2>
-        <ul class="gifts">
-          <li><span>01</span><b>Branded brass name plate</b><small>Engraved, for your front door</small></li>
-          <li><span>02</span><b>Branded tissues</b><small>For the room and the bathroom</small></li>
-          <li><span>03</span><b>Branded slippers</b><small>Waiting by the bed for every guest</small></li>
-          <li><span>04</span><b>Branded glass water bottles</b><small>On the bedside, ready for check-in</small></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec" id="extras" aria-label="Add-ons and exclusions">
-    <div class="wrap two">
-      <div>
-        <p class="kicker">Add what you need</p>
-        <h2>Make it yours.</h2>
-        <ul class="prices">
-          <li><span>Mini fridge, 45–50 L</span><span>₹14,000</span></li>
-          <li><span>Microwave, 20 L</span><span>₹10,000</span></li>
-          <li><span>WiFi router with guest network, set up</span><span>₹4,500</span></li>
-          <li><span>Smart TV 32" with streaming stick, wall-mounted</span><span>₹22,000</span></li>
-          <li><span>Round table with chair — eating or working</span><span>₹9,500</span></li>
-          <li><span>Branded amenity kit — tissue, toiletries, coasters, welcome card</span><span>₹8,000</span></li>
-          <li><span>Reels package — vertical video for Instagram and your listing</span><span>₹15,000</span></li>
-          <li><span>Restock subscription — linen, toiletries, consumables</span><span>₹2,500 / month</span></li>
-        </ul>
-        <p class="fine">Add-ons plus applicable GST. Installed on the same day.</p>
-      </div>
-      <div>
-        <p class="kicker">What’s not included</p>
-        <h2>Said plainly, up front.</h2>
-        <ul class="nots">
-          <li>Structural, plumbing or electrical work, false ceilings, rewiring</li>
-          <li>Air conditioner, fan and wardrobe — we work with what you already have</li>
-          <li>Washing machine and dishwasher</li>
-          <li>Additional or sofa beds — quoted separately</li>
-          <li>Studios above 350 sq ft — quoted separately</li>
-          <li>Your society or building permissions</li>
-        </ul>
-        <p class="fine">We work with what you already have — and quote anything bigger separately.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec cream" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <p class="kicker">How it works</p>
-      <h2 id="how-h">Fifteen days from booking to a bookable room.</h2>
-      <ol class="days">
-        <li><b>Day 0</b><p>Send photos and measurements. We confirm the price within 24 hours.</p><span class="pay first">10% to book</span></li>
-        <li><b>Day 1</b><p>Approve the design plan with the actual items. Sourcing starts.</p><span class="pay">30%</span></li>
-        <li><b>Day 2–12</b><p>Everything is made and collected at our end. Nothing lands at your door piecemeal.</p><span class="pay">30% by day 7</span></li>
-        <li><b>Day 13</b><p>Everything is packed and dispatched to your studio.</p><span class="pay">30% before delivery</span></li>
-        <li><b>Day 14</b><p>Install day. We assemble, place, hang and style the entire room.</p></li>
-        <li><b>Day 15</b><p>Deep clean and professional shoot. Images sent that evening.</p><span class="pay none">Nothing to pay</span></li>
-      </ol>
-      <p class="paybar">10% to book · the balance in three equal parts, all before delivery · nothing to pay on handover day</p>
-    </div>
-  </section>
-
-  <section class="sec" id="faq" aria-labelledby="faq-h">
-    <div class="wrap">
-      <p class="kicker">Questions</p>
-      <h2 id="faq-h">Everything owners ask us.</h2>
-      <div class="faq">
-        <details><summary>Why no fridge or microwave?</summary><p>Most studio guests don’t cook, and leaving them out keeps your price lower. Add them and we install them the same day.</p></details>
-        <details><summary>Can I change items?</summary><p>Yes, within the palette. Swap the chair, choose a different pendant, change the art. We keep the room coherent.</p></details>
-        <details><summary>Can I see it before you order?</summary><p>Yes. You approve the design plan with the actual items before anything is bought.</p></details>
-        <details><summary>What if something arrives damaged?</summary><p>We replace it. Every appliance carries its manufacturer warranty, registered in your name.</p></details>
-        <details><summary>Will it fit my studio?</summary><p>Send measurements with your photos. If the room is tight we adjust the layout, or suggest a smaller bed.</p></details>
-        <details><summary>Do you do 1BHK and villas?</summary><p>Yes. The Drop comes in Studio, Villa and Estate. Tell us the property and we’ll quote it.</p></details>
-        <details><summary>I want you to run it too.</summary><p>That’s Red Flag Outpost Classic — we design, brand, launch and operate it for 8% of bookings. Join within 90 days and we deduct what you spent on The Drop from the Outpost setup fee.</p></details>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec deep order" id="order" aria-labelledby="order-h">
-    <div class="wrap">
-      <p class="kicker">Order yours</p>
-      <h2 id="order-h">A price in 24 hours. A finished room in fifteen days.</h2>
-      <p class="lede">Send photos of the studio and its measurements. That’s all we need to start.</p>
-      <div class="row">
-        <a class="btn btn-pay" href="mailto:hello@redflaghomes.in?subject=The%20Drop%20%E2%80%94%20Studio%20Noir&amp;body=Photos%20and%20measurements%20attached.">Send photos and measurements</a>
-        <a class="btn btn-ghost js-pdf" href="TheDrop_Studio_Noir.pdf" download="TheDrop_Studio_Noir.pdf">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg>
-          Download the brochure (PDF)
-        </a>
-      </div>
-      <p class="mini">Core <b>₹2,09,000</b> · Full Noir <b>₹2,79,000</b> · 35% off · free Red Flag gift · 10% to book · plus GST</p>
-    </div>
-  </section>
-</main>
-
-<footer class="site">
-  <div class="wrap">
-    <a class="big" href="https://redflaghomes.in">redflaghomes.in</a>
-    <div><a href="mailto:hello@redflaghomes.in">hello@redflaghomes.in</a> · The Drop by Red Flag · Studio · Villa · Estate</div>
-    <div>Red Flag Homes Network · a company of Red Flag World Holdings Ltd, London</div>
-    <p class="legal">Prices plus applicable GST, for studios up to 350 sq ft in our delivery cities. Sizes are standard and may vary slightly by supplier. Specific items may be substituted for equivalents of the same quality and palette where stock requires it — the design plan you approve is what we deliver. Images marked “Sample image” are for illustration.</p>
-  </div>
-</footer>
 
 <script>
 (function () {
@@ -850,10 +393,16 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     ctl.classList.toggle('hot', i > 0);
   }
 
-  /* ---- scene engine: directional wipe between aligned plates ---- */
-  var EASE = 'cubic-bezier(0.22,1,0.36,1)', DUR = 900;
+  /* ---- scene engine: WebGL dissolve, with the CSS wipe as the fallback ---- */
+  var EASE = 'cubic-bezier(0.22,1,0.36,1)', DUR = 900, REDUCED_FADE = 150;
+  var STANDIN = 'drop/studio-noir/sample-kitchenette.jpg';   // shown, graded per stage, until all five plates load
+  var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js';
+  var STORE_KEY = 'redflag:the-drop:studio-noir:stage';
+  var GL_PARAM = (/[?&]gl=(\w+)/.exec(location.search) || [])[1];   // "off" / "force" — for testing only
   var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var scenes = {}, current = null, tx = null;
+  var finePointerMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
+  var scenes = {}, order = [], current = null, tx = null, mode = null, settled = 0;
+  var gl = null, glDead = GL_PARAM === 'off', standinImg = null;
 
   buttons.forEach(function (b) {
     b.disabled = true;
@@ -869,31 +418,32 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     m.parentNode.insertBefore(win, m);
     win.appendChild(m);
     win.appendChild(seam);
-    var s = { name: m.getAttribute('data-scene'), win: win, media: m, seam: seam, ready: false };
+    var s = { name: m.getAttribute('data-scene'), win: win, media: m, seam: seam, el: null, src: null, ready: false };
     scenes[s.name] = s;
+    order.push(s);
     if (m.classList.contains('on')) { win.classList.add('on'); current = s; }
-    prime(s).then(function () {
+    prime(s).then(function (el) {
+      settled++;
+      if (!el) { enterStandin(); return; }
+      if (mode === 'standin') return;
+      s.el = s.src = el;
       s.ready = true;
       if (s === current) play(s);
-      buttons.forEach(function (b) {
-        if (b.getAttribute('data-scene') !== s.name) return;
-        b.classList.remove('pending');
-        b.removeAttribute('aria-busy');
-        if (!picked) b.disabled = false;
-      });
+      enable(s);
+      if (settled === order.length) { mode = 'plates'; bootGL(); }
     });
   });
 
-  // Resolves once the slot can be shown without a blank frame: decoded photo, first video frame, or the gradient fallback.
+  // Resolves with the element once it can be shown without a blank frame, or null if the slot has no usable media.
   function prime(s) {
     var el = s.media.querySelector('img,video');
-    if (!el) return Promise.resolve();
+    if (!el) return Promise.resolve(null);
     return new Promise(function (done) {
       var isVid = el.tagName === 'VIDEO';
-      function fail() { if (el.parentNode) el.parentNode.removeChild(el); done(); }
+      function fail() { if (el.parentNode) el.parentNode.removeChild(el); done(null); }
       function ok() {
         var p = !isVid && el.decode ? el.decode() : Promise.resolve();
-        p.then(function () { el.classList.add('ready'); done(); }, fail);
+        p.then(function () { el.classList.add('ready'); done(el); }, fail);
       }
       if (isVid) {
         el.muted = true; el.playsInline = true; el.preload = 'auto';
@@ -910,15 +460,52 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     });
   }
 
+  // Any missing plate means the five can't line up, so every stage uses the one stand-in photo instead.
+  function enterStandin() {
+    if (mode === 'standin') return;
+    mode = 'standin';
+    var img = new Image();
+    img.decoding = 'async';
+    img.src = STANDIN;
+    (img.decode ? img.decode() : Promise.reject()).then(function () {
+      standinImg = img;
+      order.forEach(function (s) {
+        var old = s.media.querySelector('img,video');
+        if (old) old.parentNode.removeChild(old);
+        var el = img.cloneNode();
+        el.alt = '';
+        el.className = 'standin ready';
+        s.media.appendChild(el);
+        s.el = el;
+        s.src = img;   // the decoded original feeds WebGL; the clones may still be loading
+        s.ready = true;
+        enable(s);
+      });
+      bootGL();
+    }, function () {
+      order.forEach(function (s) { s.el = s.src = null; s.ready = true; enable(s); });
+    });
+  }
+
+  function enable(s) {
+    buttons.forEach(function (b) {
+      if (b.getAttribute('data-scene') !== s.name) return;
+      b.classList.remove('pending');
+      b.removeAttribute('aria-busy');
+      if (!picked) b.disabled = false;
+    });
+  }
+
   function play(s) {
     var v = s.media.querySelector('video');
-    if (v && !reduceMQ.matches) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    if (v && !reduceMQ.matches && !document.hidden) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
   }
   function pause(s) {
     var v = s.media.querySelector('video');
     if (v) v.pause();
   }
 
+  /* CSS path */
   function settle() {
     var t = tx;
     if (!t) return;
@@ -932,9 +519,16 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     pause(drop);
   }
 
+  function cssSet(target) {
+    if (tx) settle();
+    if (target === current) return;
+    target.win.classList.add('on');
+    current.win.classList.remove('on');
+    current = target;
+  }
+
   // Forward stages wipe in left→right; returning to the plain room wipes right→left.
   function go(target, dir) {
-    if (!target) return;
     if (tx) {
       if (target === (tx.back ? tx.from : tx.to)) return;
       if (target === (tx.back ? tx.to : tx.from)) {
@@ -947,45 +541,399 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     if (target === current) return;
     var from = current;
     play(target);
-    if (reduceMQ.matches || !target.win.animate) {
-      target.win.classList.add('on');
-      from.win.classList.remove('on');
-      current = target;
+    if (!target.win.animate) {
+      cssSet(target);
       pause(from);
       return;
     }
-    var sx = dir === 'rev' ? 100 : -100;
-    var opt = { duration: DUR, easing: EASE, fill: 'both' };
     var t = { from: from, to: target, back: false };
-    target.win.classList.add('in', dir);
-    // The window slides in while the plate counter-slides, so the photo itself never moves — only the edge does.
-    t.anims = [
-      target.win.animate([{ transform: 'translate3d(' + sx + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
-      target.media.animate([{ transform: 'translate3d(' + (-sx) + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
-      target.seam.animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], opt)
-    ];
+    if (reduceMQ.matches) {
+      target.win.classList.add('in');
+      t.anims = [target.win.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCED_FADE, easing: 'ease-out', fill: 'both' })];
+    } else {
+      var sx = dir === 'rev' ? 100 : -100;
+      var opt = { duration: DUR, easing: EASE, fill: 'both' };
+      target.win.classList.add('in', dir);
+      // The window slides in while the plate counter-slides, so the photo itself never moves — only the edge does.
+      t.anims = [
+        target.win.animate([{ transform: 'translate3d(' + sx + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
+        target.media.animate([{ transform: 'translate3d(' + (-sx) + '%,0,0)' }, { transform: 'translate3d(0,0,0)' }], opt),
+        target.seam.animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], opt)
+      ];
+    }
     t.anims[0].onfinish = function () { if (tx === t) settle(); };
     tx = t;
   }
 
-  function show(scene) {
-    go(scenes[scene], scene === 'base' ? 'rev' : 'fwd');
+  function show(name, instant) {
+    var s = scenes[name];
+    if (gl) { play(s); gl.go(s, instant); cssSet(s); return; }
+    if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); return; }
+    go(s, name === 'base' ? 'rev' : 'fwd');
   }
 
-  function select(btn) {
+  /* WebGL path */
+  function webglOK() {
+    try {
+      var c = document.createElement('canvas');
+      var ctx = c.getContext('webgl2', { failIfMajorPerformanceCaveat: GL_PARAM !== 'force' }) ||
+                c.getContext('webgl', { failIfMajorPerformanceCaveat: GL_PARAM !== 'force' });
+      if (!ctx) return false;
+      var lose = ctx.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function bootGL() {
+    if (gl || glDead) return;
+    if (!order.every(function (s) { return s.ready && s.src; })) return;
+    if (!webglOK()) { glDead = true; return; }
+    var go3 = function () {
+      if (gl || glDead) return;
+      if (!window.THREE) { glDead = true; return; }
+      try { gl = createGL(window.THREE); }
+      catch (e) { glDead = true; gl = null; stage.classList.remove('gl-on', 'gl-live'); }
+    };
+    if (window.THREE) return go3();
+    var sc = document.createElement('script');
+    sc.src = THREE_URL;
+    sc.async = true;
+    sc.crossOrigin = 'anonymous';
+    sc.onload = go3;
+    sc.onerror = function () { glDead = true; };
+    document.head.appendChild(sc);
+  }
+
+  function cubicBezier(x1, y1, x2, y2) {
+    function A(a1, a2) { return 1 - 3 * a2 + 3 * a1; }
+    function B(a1, a2) { return 3 * a2 - 6 * a1; }
+    function C(a1) { return 3 * a1; }
+    function at(t, a1, a2) { return ((A(a1, a2) * t + B(a1, a2)) * t + C(a1)) * t; }
+    function slope(t, a1, a2) { return 3 * A(a1, a2) * t * t + 2 * B(a1, a2) * t + C(a1); }
+    return function (x) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      var t = x;
+      for (var i = 0; i < 8; i++) {
+        var d = slope(t, x1, x2);
+        if (Math.abs(d) < 1e-6) break;
+        t -= (at(t, x1, x2) - x) / d;
+      }
+      if (t < 0 || t > 1 || Math.abs(at(t, x1, x2) - x) > 1e-4) {
+        var lo = 0, hi = 1;
+        for (var j = 0; j < 30; j++) { t = (lo + hi) / 2; if (at(t, x1, x2) < x) lo = t; else hi = t; }
+      }
+      return at(t, y1, y2);
+    };
+  }
+  var easeOut = cubicBezier(0.22, 1, 0.36, 1);
+  function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+
+  // Tileable fbm value noise in three channels: R drives where the dissolve reaches first, G/B warp the photo.
+  function makeNoise(T) {
+    var N = 256, c = document.createElement('canvas');
+    c.width = c.height = N;
+    var ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
+    var chans = [0, 1, 2].map(function (ch) {
+      var seed = 1013 + ch * 7919, out = new Float32Array(N * N), lo = 1, hi = 0;
+      var octs = [4, 8, 16, 32].map(function (g) {
+        var a = new Float32Array(g * g);
+        for (var i = 0; i < a.length; i++) { seed = (seed * 16807) % 2147483647; a[i] = seed / 2147483647; }
+        return { g: g, a: a };
+      });
+      for (var y = 0; y < N; y++) for (var x = 0; x < N; x++) {
+        var v = 0, amp = 0.5, norm = 0;
+        octs.forEach(function (o) {
+          var fx = x / N * o.g, fy = y / N * o.g, ix = Math.floor(fx), iy = Math.floor(fy);
+          var tx_ = fx - ix, ty = fy - iy, sx = tx_ * tx_ * (3 - 2 * tx_), sy = ty * ty * (3 - 2 * ty);
+          var x0 = ix % o.g, x1 = (ix + 1) % o.g, y0 = iy % o.g, y1 = (iy + 1) % o.g;
+          var top = o.a[y0 * o.g + x0] * (1 - sx) + o.a[y0 * o.g + x1] * sx;
+          var bot = o.a[y1 * o.g + x0] * (1 - sx) + o.a[y1 * o.g + x1] * sx;
+          v += (top * (1 - sy) + bot * sy) * amp; norm += amp; amp *= 0.5;
+        });
+        v /= norm; out[y * N + x] = v;
+        if (v < lo) lo = v; if (v > hi) hi = v;
+      }
+      for (var k = 0; k < out.length; k++) out[k] = (out[k] - lo) / (hi - lo);
+      return out;
+    });
+    for (var i = 0; i < N * N; i++) {
+      img.data[i * 4] = chans[0][i] * 255; img.data[i * 4 + 1] = chans[1][i] * 255;
+      img.data[i * 4 + 2] = chans[2][i] * 255; img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    var tex = new T.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = T.RepeatWrapping;
+    tex.generateMipmaps = false;
+    tex.minFilter = tex.magFilter = T.LinearFilter;
+    return tex;
+  }
+
+  var VERT = [
+    'varying vec2 vUv;',
+    'void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+  ].join('\n');
+  var FRAG = [
+    'precision highp float;',
+    'varying vec2 vUv;',
+    'uniform sampler2D tFrom; uniform sampler2D tTo; uniform sampler2D tNoise;',
+    'uniform float uAspFrom; uniform float uAspTo; uniform float uPlaneAsp; uniform vec2 uFocus;',
+    'uniform float uP; uniform float uFade; uniform vec4 gFrom; uniform vec4 gTo; uniform float uSweep;',
+    'uniform vec2 uSrc; uniform float uToBase;',
+    'vec2 cover(vec2 uv, float ta) {',
+    '  vec2 s = uPlaneAsp > ta ? vec2(1.0, ta / uPlaneAsp) : vec2(uPlaneAsp / ta, 1.0);',
+    '  return uv * s + (1.0 - s) * uFocus;',
+    '}',
+    'vec3 grade(vec3 c, vec4 g) {',
+    '  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));',
+    '  c = mix(vec3(l), c, g.x);',
+    '  c = (c - 0.5) * g.z + 0.5;',
+    '  c *= g.y;',
+    '  c += vec3(g.w, g.w * 0.4, -g.w * 0.6);',
+    '  return clamp(c, 0.0, 1.0);',
+    '}',
+    'void main() {',
+    '  vec2 uv = vUv;',
+    '  vec3 nz = texture2D(tNoise, uv * vec2(uPlaneAsp, 1.0) * 0.55).rgb;',
+    '  vec3 col;',
+    '  if (uFade > 0.5) {',
+    '    col = mix(grade(texture2D(tFrom, cover(uv, uAspFrom)).rgb, gFrom), grade(texture2D(tTo, cover(uv, uAspTo)).rgb, gTo), uP);',
+    '  } else {',
+    // the change blooms out from the light source; going back to the plain room it closes in from the edges
+    '    float dl = clamp(length((uv - uSrc) * vec2(uPlaneAsp, 1.0)) / (0.9 * max(uPlaneAsp, 1.0)), 0.0, 1.0);',
+    '    float edge = 0.3;',
+    '    float n = edge + mix(nz.r, mix(dl, 1.0 - dl, uToBase), 0.62) * (1.0 - edge);',
+    '    float t = smoothstep(n - edge, n, uP * (1.0 + edge));',
+    '    vec2 d = (nz.gb - 0.5) * 0.045;',
+    '    vec3 a = grade(texture2D(tFrom, cover(uv + d * t, uAspFrom)).rgb, gFrom);',
+    '    vec3 b = grade(texture2D(tTo, cover(uv - d * (1.0 - t), uAspTo)).rgb, gTo);',
+    '    col = mix(a, b, t);',
+    '    float band = t * (1.0 - t) * 4.0;',
+    '    col += vec3(1.0, 0.74, 0.46) * band * band * mix(0.24, 0.07, uToBase);',
+    '  }',
+    '  if (uSweep >= 0.0) {',
+    '    vec2 q = vec2(uv.x * uPlaneAsp, uv.y);',
+    '    vec2 dir = normalize(vec2(1.0, -0.42));',
+    '    float along = (dot(q, dir) - dir.y) / (uPlaneAsp * dir.x - dir.y);',
+    '    float g = exp(-pow((along - mix(-0.25, 1.25, uSweep)) / 0.1, 2.0));',
+    '    float streak = texture2D(tNoise, vec2(along * 0.8, dot(q, vec2(-dir.y, dir.x)) * 3.0)).r;',
+    '    float I = g * sin(3.14159 * uSweep) * (0.55 + 0.9 * streak) * 0.085;',
+    '    col = 1.0 - (1.0 - col) * (1.0 - vec3(1.0, 0.9, 0.78) * I);',
+    '  }',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}'
+  ].join('\n');
+
+  // Stand-in grades mirror the CSS filters on img.standin, so the two paths match. Real plates are shown untouched.
+  var GRADE = { base: [0, 1.45, 0.62, -0.02], room: [0.45, 1.1, 0.86, -0.03], light: [1, 1, 1, 0.035], style: [1.2, 1, 1.05, 0.025], shoot: [1.25, 1.06, 1.14, 0.02] };
+  var MAX_TILT = 2.2 * Math.PI / 180, OVERSCAN = 1.08, FOV = 30, DIST = 10;
+
+  function createGL(T) {
+    var canvas = document.getElementById('gl');
+    var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false, powerPreference: 'high-performance',
+      failIfMajorPerformanceCaveat: GL_PARAM !== 'force' });
+    renderer.outputColorSpace = T.LinearSRGBColorSpace;   // pass photo pixels through untouched, like the CSS layer
+    var dead = false, raf = 0, last = 0, clock = 0, dprCap = 2;
+    var view = { go: go3 };
+    renderer.debug.onShaderError = function () { kill(); };
+    canvas.addEventListener('webglcontextlost', kill, { once: true });
+
+    var scene = new T.Scene();
+    var camera = new T.PerspectiveCamera(FOV, 1, 0.1, 100);
+    camera.position.z = DIST;
+    var noise = makeNoise(T);
+    var texByEl = new Map();
+    function texOf(s) {
+      if (texByEl.has(s.src)) return texByEl.get(s.src);
+      var tex = s.src.tagName === 'VIDEO' ? new T.VideoTexture(s.src) : new T.Texture(s.src);
+      tex.generateMipmaps = false;
+      tex.minFilter = tex.magFilter = T.LinearFilter;
+      tex.needsUpdate = true;
+      renderer.initTexture(tex);
+      texByEl.set(s.src, tex);
+      return tex;
+    }
+    function aspOf(s) {
+      var e = s.src;
+      return e.tagName === 'VIDEO' ? (e.videoWidth / e.videoHeight || 1.5) : (e.naturalWidth / e.naturalHeight || 1.5);
+    }
+    function gradeOf(s) { var g = mode === 'standin' ? GRADE[s.name] : [1, 1, 1, 0]; return new T.Vector4(g[0], g[1], g[2], g[3]); }
+    order.forEach(texOf);   // upload every texture before the canvas is ever shown
+
+    var u = {
+      tFrom: { value: null }, tTo: { value: null }, tNoise: { value: noise },
+      uAspFrom: { value: 1 }, uAspTo: { value: 1 }, uPlaneAsp: { value: 1 }, uFocus: { value: new T.Vector2(0.5, 0.55) },
+      uP: { value: 0 }, uFade: { value: 0 }, gFrom: { value: new T.Vector4() }, gTo: { value: new T.Vector4() }, uSweep: { value: -1 },
+      uSrc: { value: new T.Vector2(0.5, 0.86) }, uToBase: { value: 0 }
+    };
+    var mesh = new T.Mesh(new T.PlaneGeometry(1, 1), new T.ShaderMaterial({ uniforms: u, vertexShader: VERT, fragmentShader: FRAG }));
+    scene.add(mesh);
+
+    var cur = current, gtx = null, baseW = 1, baseH = 1;
+    function bind(a, b) {
+      u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a);
+      u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b);
+    }
+    bind(cur, cur);
+
+    function finish() {
+      var keep = gtx.target === 1 ? gtx.to : gtx.from, drop = keep === gtx.to ? gtx.from : gtx.to;
+      gtx = null; cur = keep;
+      bind(cur, cur); u.uP.value = 0;
+      if (drop !== cur) pause(drop);
+    }
+    function go3(s, instant) {
+      if (dead) return;
+      if (gtx) {
+        var heading = gtx.target === 1 ? gtx.to : gtx.from;
+        if (s === heading) return;
+        if (s === gtx.from || s === gtx.to) {
+          gtx.p0 = u.uP.value; gtx.target = 1 - gtx.target; gtx.t0 = performance.now();
+          gtx.dur = Math.max(60, gtx.full * Math.abs(gtx.target - gtx.p0));
+          return;
+        }
+        finish();
+      }
+      if (s === cur) return;
+      if (instant) { var was = cur; cur = s; bind(s, s); u.uP.value = 0; if (was !== s) pause(was); return; }
+      var reduced = reduceMQ.matches;
+      gtx = { from: cur, to: s, p0: 0, target: 1, t0: performance.now(), full: reduced ? REDUCED_FADE : DUR };
+      gtx.dur = gtx.full;
+      u.uFade.value = reduced ? 1 : 0;
+      u.uToBase.value = s.name === 'base' ? 1 : 0;
+      bind(cur, s);
+    }
+
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      baseH = 2 * DIST * Math.tan(FOV * Math.PI / 360) * OVERSCAN;
+      baseW = baseH * camera.aspect;
+      u.uPlaneAsp.value = camera.aspect;
+    }
+    var ro = window.ResizeObserver ? new ResizeObserver(resize) : null;
+    if (ro) ro.observe(stage); else window.addEventListener('resize', resize);
+    resize();
+
+    var ptr = { x: 0, y: 0 }, tilt = { x: 0, y: 0 };
+    function onMove(e) {
+      if (e.pointerType !== 'mouse') return;
+      ptr.x = e.clientX / window.innerWidth * 2 - 1;
+      ptr.y = e.clientY / window.innerHeight * 2 - 1;
+    }
+    function onOut(e) { if (!e.relatedTarget) { ptr.x = 0; ptr.y = 0; } }
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('pointerout', onOut, { passive: true });
+
+    // Frame-rate guard: if the shader can't hold ~50fps, drop to 1x pixels, then to the CSS path.
+    var probe = { n: 0, sum: 0, skip: 20 };
+    function probeFrame(dt) {
+      if (probe.done) return;
+      if (probe.skip > 0) { probe.skip--; return; }
+      probe.sum += dt; probe.n++;
+      if (probe.n < 90) return;
+      var fps = probe.n / probe.sum;
+      view.fps = Math.round(fps);
+      if (fps >= 50 || GL_PARAM === 'force') { probe.done = true; return; }
+      if (dprCap > 1 && (window.devicePixelRatio || 1) > 1) { dprCap = 1; resize(); probe = { n: 0, sum: 0, skip: 20 }; return; }
+      kill();
+    }
+
+    function frame(now) {
+      raf = requestAnimationFrame(frame);
+      var dt = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60;
+      last = now;
+      var reduced = reduceMQ.matches;
+      if (!reduced) clock += dt;
+
+      var tri = (clock / 20) % 2; tri = tri > 1 ? 2 - tri : tri;     // 1.00 → 1.04 over 20s, back over the next 20s
+      var drift = reduced ? 1 : 1 + 0.04 * tri;
+      mesh.scale.set(baseW * drift, baseH * drift, 1);
+
+      var parallax = !reduced && finePointerMQ.matches && stage.clientWidth > 700;
+      var k = 1 - Math.exp(-dt * 3.5);
+      tilt.x += ((parallax ? ptr.x : 0) - tilt.x) * k;
+      tilt.y += ((parallax ? ptr.y : 0) - tilt.y) * k;
+      mesh.rotation.y = tilt.x * MAX_TILT;
+      mesh.rotation.x = tilt.y * MAX_TILT;
+
+      if (gtx) {
+        var e = Math.min(1, (now - gtx.t0) / gtx.dur);
+        u.uP.value = gtx.p0 + (gtx.target - gtx.p0) * (gtx.full === DUR ? easeOut(e) : e);
+        if (e >= 1) finish();
+      }
+
+      var sw = (clock + 7) % 12;                                    // first sweep ~5s in, then every 12s
+      u.uSweep.value = reduced || sw >= 3.6 ? -1 : easeInOut(sw / 3.6);
+
+      renderer.render(scene, camera);
+      view.frames = (view.frames || 0) + 1;
+      if (!view.live) goLive();
+      probeFrame(dt);
+    }
+
+    function goLive() {
+      if (dead) return;
+      view.live = true;
+      if (tx) settle();
+      stage.classList.add('gl-on');
+      setTimeout(function () { if (!dead) stage.classList.add('gl-live'); }, 520);
+    }
+    function start() { if (!dead && !raf) { last = 0; raf = requestAnimationFrame(frame); } }
+    function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+    view.start = start; view.stop = stop;
+
+    function kill() {
+      if (dead) return;
+      dead = true; glDead = true;
+      stop();
+      stage.classList.remove('gl-on', 'gl-live');
+      window.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerout', onOut);
+      if (ro) ro.disconnect();
+      try {
+        texByEl.forEach(function (t) { t.dispose(); });
+        noise.dispose(); mesh.geometry.dispose(); mesh.material.dispose(); renderer.dispose();
+      } catch (e) {}
+      if (gl === view) gl = null;
+    }
+    view.kill = kill;
+    window.__drop = view;
+    if (!document.hidden) start();
+    return view;
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    var hidden = document.hidden;
+    stage.classList.toggle('paused', hidden);
+    if (hidden) { if (gl) gl.stop(); if (current) pause(current); }
+    else { if (gl) gl.start(); if (current) play(current); }
+  });
+
+  /* ---- where they left off ---- */
+  function store(v) { try { window.localStorage.setItem(STORE_KEY, v); } catch (e) {} }
+  function recall() { try { return window.localStorage.getItem(STORE_KEY); } catch (e) { return null; } }
+
+  function select(btn, restoring) {
     var scene = btn.getAttribute('data-scene');
     picked = btn;
-    show(scene);
+    show(scene, restoring);
     caption.textContent = TEXT[scene] || '';
     stage.classList.add('picked', 'title-hidden');
     buttons.forEach(function (b) {
       var on = b === btn;
       b.classList.toggle('on', on);
-      if (on) { b.textContent = 'Reset'; }
+      if (on) { b.textContent = 'Reset'; b.disabled = false; b.classList.remove('pending'); }
       else { b.disabled = true; b.setAttribute('aria-hidden', 'true'); b.tabIndex = -1; }
     });
     live.textContent = btn.getAttribute('data-label') + ' shown. Reset to go back.';
-    try { btn.focus({ preventScroll: true }); } catch (e) {}
+    store(scene);
+    if (!restoring) { try { btn.focus({ preventScroll: true }); } catch (e) {} }
   }
 
   function reset() {
@@ -993,8 +941,10 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     stage.classList.remove('picked', 'title-hidden');
     caption.textContent = '';
     buttons.forEach(function (b) {
+      var ready = scenes[b.getAttribute('data-scene')].ready;
       b.classList.remove('on');
-      b.disabled = !scenes[b.getAttribute('data-scene')].ready;
+      b.classList.toggle('pending', !ready);
+      b.disabled = !ready;
       b.removeAttribute('aria-hidden');
       b.tabIndex = 0;
       b.textContent = b.getAttribute('data-label');
@@ -1002,6 +952,7 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     moveCapsule(0);
     picked = null;
     live.textContent = 'Back to the base room.';
+    store('base');
   }
 
   buttons.forEach(function (b, i) {
@@ -1016,23 +967,28 @@ footer.site .legal{max-width:90ch;font-size:11.5px;color:rgba(255,255,255,.4)}
     ctl.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
   }, { passive: true });
 
+  var saved = recall();
+  var savedBtn = saved && saved !== 'base' ? buttons.filter(function (b) { return b.getAttribute('data-scene') === saved; })[0] : null;
+  if (savedBtn) {
+    var note = document.getElementById('resume');
+    stage.classList.add('instant');
+    select(savedBtn, true);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { stage.classList.remove('instant'); }); });
+    note.classList.add('show');
+    live.textContent = 'Picking up where you left off. ' + savedBtn.getAttribute('data-label') + ' shown.';
+    setTimeout(function () { note.classList.remove('show'); }, 3800);
+  }
+
   /* ---- links: put your real ones here ---- */
-  var RAZORPAY = '';        // Core, 10% booking — e.g. 'https://rzp.io/l/xxxxxxxx'
-  var RAZORPAY_FULL = '';   // Full Noir, 10% booking
+  var RAZORPAY = '';   // e.g. 'https://rzp.io/l/xxxxxxxx'
   var PDF = 'TheDrop_Studio_Noir.pdf';
   var pay = document.getElementById('pay'), pdf = document.getElementById('pdf');
-  function wirePay(a, url) {
-    if (url) { a.href = url; return; }
-    a.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
+  if (RAZORPAY) { pay.href = RAZORPAY; } else {
+    pay.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
   }
-  wirePay(pay, RAZORPAY);
-  [].slice.call(document.querySelectorAll('[data-pay]')).forEach(function (a) {
-    wirePay(a, a.getAttribute('data-pay') === 'full' ? RAZORPAY_FULL : RAZORPAY);
-  });
-  [pdf].concat([].slice.call(document.querySelectorAll('.js-pdf'))).forEach(function (a) {
-    a.href = PDF;
-    a.setAttribute('download', PDF.split('/').pop());
-  });
+  if (PDF) { pdf.href = PDF; } else {
+    pdf.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Brochure link not set yet.'; });
+  }
 })();
 </script>
 </body>
