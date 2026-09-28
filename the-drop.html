@@ -317,6 +317,27 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 /* The room: the three sample looks play inside the scene; this line names the one on screen */
 .media img.look{opacity:0;visibility:hidden;z-index:1;transition:none}
 .js .media video.hero-video{z-index:1;opacity:1;transition:none}
+/* The shoot: the photo starts with the candles out; on arrival each flame strikes, then flickers, and the room warms */
+.shoot-wrap{position:absolute;inset:0;z-index:1;overflow:hidden}
+.media img.shoot-img{filter:brightness(.42);transition:filter 1500ms var(--ease) 150ms}
+.shoot-wrap.lit img.shoot-img{filter:brightness(1)}
+.cndl{position:absolute;width:0;height:0;pointer-events:none}
+.cndl::before,.cndl::after{content:"";position:absolute;border-radius:50%}
+.cndl::before{width:calc(var(--dh) * .07);height:calc(var(--dh) * .07);left:calc(var(--dh) * -.035);top:calc(var(--dh) * -.035);
+  background:radial-gradient(circle,rgb(0 0 0 / .88) 0 30%,rgb(0 0 0 / 0) 70%);transition:opacity 260ms ease var(--d)}
+.cndl::after{width:calc(var(--dh) * .34);height:calc(var(--dh) * .34);left:calc(var(--dh) * -.17);top:calc(var(--dh) * -.17);
+  background:radial-gradient(circle,rgb(255 220 170 / .8) 0,rgb(255 168 90 / .38) 12%,rgb(255 140 60 / .12) 40%,rgb(255 140 60 / 0) 70%);
+  mix-blend-mode:screen;opacity:0;transform:scale(.3)}
+.shoot-wrap.lit .cndl::before{opacity:0}
+.shoot-wrap.lit .cndl::after{animation:strike 700ms var(--ease) var(--d) both,flicker 2.4s ease-in-out calc(var(--d) + 700ms) infinite}
+@keyframes strike{0%{opacity:0;transform:scale(.3)}30%{opacity:1;transform:scale(1.25)}100%{opacity:.92;transform:scale(1)}}
+@keyframes flicker{0%,100%{opacity:.92;transform:scale(1)}20%{opacity:.8;transform:scale(.97)}45%{opacity:1;transform:scale(1.04)}70%{opacity:.86;transform:scale(.99)}}
+.shoot-wrap.instant-lit img.shoot-img,.shoot-wrap.instant-lit .cndl::before{transition:none}
+.shoot-wrap.instant-lit .cndl::after{animation:flicker 2.4s ease-in-out infinite;opacity:.92;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .media img.shoot-img,.cndl::before{transition:none}
+  .shoot-wrap.lit .cndl::after,.shoot-wrap.instant-lit .cndl::after{animation:none;opacity:.92;transform:none}
+}
 .media img.look.on{opacity:1;visibility:visible}
 .media img.look.top{z-index:2}
 .looks{--gap:clamp(28px,5vh,56px);position:relative;z-index:21;height:0;flex:none}
@@ -459,7 +480,14 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   ];
   var LOOK_HOLD = 4200;
   // Phone hero: this footage plays behind the plain room on narrow screens; the stages keep their photos.
-  var HERO_VIDEO = { src: 'drop/studio-noir/hero-mobile.mp4', poster: 'drop/studio-noir/hero-mobile-poster.jpg', media: '(max-width: 700px)' };
+  var HERO_VIDEO = { src: 'drop/studio-noir/hero-mobile.mp4', poster: 'drop/studio-noir/hero-mobile-poster.jpg', media: '(max-width: 700px)', focus: [0.88, 0.5] };
+  // "The shoot": this photo, with its candles lit one by one as the stage arrives. Focus keeps the nightstand candles in frame.
+  var SHOOT = { src: 'drop/studio-noir/shoot-candles.jpg', focus: [0.85, 0.75] };
+  // flame positions in the photo (0–1, measured from the bottom-left) and when each one lights, in ms after the stage arrives
+  var CANDLES = [
+    { x: 0.920, y: 0.367, d: 250 }, { x: 0.952, y: 0.372, d: 520 }, { x: 0.993, y: 0.364, d: 900 },
+    { x: 0.052, y: 0.416, d: 700 }, { x: 0.008, y: 0.421, d: 1050 }
+  ];
   var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js';
   var STORE_KEY = 'redflag:the-drop:studio-noir:stage';
   var GL_PARAM = (/[?&]gl=(\w+)/.exec(location.search) || [])[1];   // "off" / "force" — for testing only
@@ -542,7 +570,8 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     heroVid.poster = HERO_VIDEO.poster;
     heroVid.src = HERO_VIDEO.src;
     scenes.base.media.appendChild(heroVid);
-    hero = { name: 'base', sample: true, media: null, src: null, video: heroVid, ready: false };
+    heroVid.style.objectPosition = HERO_VIDEO.focus[0] * 100 + '% ' + HERO_VIDEO.focus[1] * 100 + '%';
+    hero = { name: 'base', sample: true, media: null, src: null, video: heroVid, ready: false, focus: HERO_VIDEO.focus };
     (heroPoster.decode ? heroPoster.decode() : Promise.reject()).then(function () {
       hero.src = heroPoster;
       hero.ready = true;
@@ -560,6 +589,79 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       if (gl && gl.refresh) gl.refresh();
     }, { once: true });
   }
+  /* "The shoot" photo, with a CSS rendition of the candles for the no-WebGL path */
+  var shootScene = null, shootSettled = !SHOOT, shootWrap = null, unlightT = 0;
+  if (SHOOT) {
+    var shootImg = new Image();
+    shootImg.decoding = 'async';
+    shootImg.src = SHOOT.src;
+    (shootImg.decode ? shootImg.decode() : Promise.reject()).then(function () {
+      shootWrap = document.createElement('div');
+      shootWrap.className = 'shoot-wrap';
+      var el = shootImg.cloneNode();
+      el.alt = '';
+      el.className = 'shoot-img ready';
+      el.style.objectPosition = SHOOT.focus[0] * 100 + '% ' + SHOOT.focus[1] * 100 + '%';
+      shootWrap.appendChild(el);
+      CANDLES.forEach(function (c) {
+        var f = document.createElement('i');
+        f.className = 'cndl';
+        f.style.setProperty('--d', c.d + 'ms');
+        shootWrap.appendChild(f);
+      });
+      scenes.shoot.media.appendChild(shootWrap);
+      shootScene = { name: 'shoot', sample: true, candles: true, media: null, src: shootImg, focus: SHOOT.focus };
+      placeCandles();
+      if (window.ResizeObserver) new ResizeObserver(placeCandles).observe(stage); else window.addEventListener('resize', placeCandles);
+      if (current === scenes.shoot) lightCandles(true);
+    }, function () {}).then(function () {
+      shootSettled = true;
+      enable(scenes.shoot);
+      bootGL();
+    });
+  }
+  // The CSS candles sit over the photo's cover crop, so they follow the same maths as object-fit: cover.
+  function placeCandles() {
+    if (!shootWrap) return;
+    var w = shootWrap.clientWidth, h = shootWrap.clientHeight, img = shootScene.src;
+    if (!w || !h) return;
+    var k = Math.max(w / img.naturalWidth, h / img.naturalHeight), dw = img.naturalWidth * k, dh = img.naturalHeight * k;
+    var ox = (w - dw) * SHOOT.focus[0], oy = (h - dh) * SHOOT.focus[1];
+    shootWrap.style.setProperty('--dh', dh + 'px');
+    [].forEach.call(shootWrap.querySelectorAll('.cndl'), function (f, i) {
+      f.style.left = (ox + CANDLES[i].x * dw) + 'px';
+      f.style.top = (oy + (1 - CANDLES[i].y) * dh) + 'px';
+    });
+  }
+  function lightCandles(instant) {
+    clearTimeout(unlightT);
+    if (!shootWrap) return;
+    shootWrap.classList.remove('lit', 'instant-lit');
+    void shootWrap.offsetWidth;   // restart the strike animation on every visit
+    shootWrap.classList.add('lit');
+    if (instant) shootWrap.classList.add('instant-lit');
+  }
+  function unlightCandles() {
+    clearTimeout(unlightT);
+    unlightT = setTimeout(function tick() {
+      if (!shootWrap) return;
+      if (current === scenes.shoot && tx) { unlightT = setTimeout(tick, 200); return; }   // still wiping away
+      if (current !== scenes.shoot) shootWrap.classList.remove('lit', 'instant-lit');
+    }, DUR + 150);
+  }
+  // Level of each flame `since` ms after the stage arrived: a quick strike that overshoots, then a soft flicker.
+  function candleLevels(since, tSec, calm) {
+    var L = CANDLES.map(function (c, i) {
+      var k = since - c.d;
+      if (k <= 0) return 0;
+      var v = k < 180 ? k / 180 * 1.3 : 1 + 0.3 * Math.exp(-(k - 180) / 220);
+      if (!calm) v *= 0.9 + 0.06 * Math.sin(tSec * 7.1 + i * 1.7) + 0.04 * Math.sin(tSec * 12.9 + i * 3.1);
+      return v;
+    });
+    var a = Math.min(1, Math.max(0, (since - 150) / 1500));
+    return { L: L, amb: 1 - Math.pow(1 - a, 3) };
+  }
+
   function heroPlay(on) {
     if (!hero) return;
     clearTimeout(heroPauseT);
@@ -571,9 +673,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   function glScene(name) {
     if (name === 'room' && hasLooks()) return looks[lookIdx];
     if (name === 'base' && hero && hero.ready) return hero;
+    if (name === 'shoot' && shootScene) return shootScene;
     return scenes[name];
   }
-  function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled); }
+  function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled) && (s.name !== 'shoot' || shootSettled); }
 
   // Resolves with the element once it can be shown without a blank frame, or null if the slot has no usable media.
   function prime(s) {
@@ -717,6 +820,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     else if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); }
     else go(s, name === 'base' ? 'rev' : 'fwd');
     if (withLooks) startLooks();
+    if (name === 'shoot') lightCandles(instant); else unlightCandles();
     if (name === 'base') heroPlay(true);
     else if (hero) heroPauseT = setTimeout(function () { if (current !== scenes.base) heroPlay(false); }, DUR + 150);   // keep it moving while it dissolves away
   }
@@ -782,7 +886,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 
   function bootGL() {
     if (gl || glDead) return;
-    if (!looksSettled || !heroSettled || !order.every(function (s) { return s.ready && s.src; })) return;
+    if (!looksSettled || !heroSettled || !shootSettled || !order.every(function (s) { return s.ready && s.src; })) return;
     if (!webglOK()) { glDead = true; return; }
     var go3 = function () {
       if (gl || glDead) return;
@@ -873,12 +977,26 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     'precision highp float;',
     'varying vec2 vUv;',
     'uniform sampler2D tFrom; uniform sampler2D tTo; uniform sampler2D tNoise;',
-    'uniform float uAspFrom; uniform float uAspTo; uniform float uPlaneAsp; uniform vec2 uFocus;',
+    'uniform float uAspFrom; uniform float uAspTo; uniform float uPlaneAsp; uniform vec2 uFocusFrom; uniform vec2 uFocusTo;',
+    'uniform float uCndFrom; uniform float uCndTo; uniform float uAmb; uniform vec3 uC[5]; uniform float uL[5];',
     'uniform float uP; uniform float uFade; uniform vec4 gFrom; uniform vec4 gTo; uniform float uSweep;',
     'uniform vec2 uSrc; uniform float uToBase;',
-    'vec2 cover(vec2 uv, float ta) {',
+    'vec2 cover(vec2 uv, float ta, vec2 f) {',
     '  vec2 s = uPlaneAsp > ta ? vec2(1.0, ta / uPlaneAsp) : vec2(uPlaneAsp / ta, 1.0);',
-    '  return uv * s + (1.0 - s) * uFocus;',
+    '  return uv * s + (1.0 - s) * f;',
+    '}',
+    // candlelight, in the photo's own coordinates: each flame is snuffed until its level rises, then glows and warms the room
+    'vec3 candles(vec3 c, vec2 tuv, float ta) {',
+    '  float dark = 0.0; vec3 glow = vec3(0.0);',
+    '  for (int i = 0; i < 5; i++) {',
+    '    vec2 d = (tuv - uC[i].xy) * vec2(ta, 1.0);',
+    '    float r2 = dot(d, d);',
+    '    float halo = exp(-r2 / 0.0014);',
+    '    float fill = exp(-r2 / 0.03);',
+    '    dark = max(dark, halo * (1.0 - clamp(uL[i], 0.0, 1.0)) * uC[i].z);',
+    '    glow += vec3(1.0, 0.6, 0.28) * (halo * 0.5 + fill * 0.15) * uL[i] * uC[i].z;',
+    '  }',
+    '  return c * mix(0.42, 1.0, uAmb) * (1.0 - 0.92 * dark) + glow;',
     '}',
     'vec3 grade(vec3 c, vec4 g) {',
     '  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));',
@@ -893,7 +1011,11 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     '  vec3 nz = texture2D(tNoise, uv * vec2(uPlaneAsp, 1.0) * 0.55).rgb;',
     '  vec3 col;',
     '  if (uFade > 0.5) {',
-    '    col = mix(grade(texture2D(tFrom, cover(uv, uAspFrom)).rgb, gFrom), grade(texture2D(tTo, cover(uv, uAspTo)).rgb, gTo), uP);',
+    '    vec2 ta0 = cover(uv, uAspFrom, uFocusFrom), tb0 = cover(uv, uAspTo, uFocusTo);',
+    '    vec3 a0 = grade(texture2D(tFrom, ta0).rgb, gFrom), b0 = grade(texture2D(tTo, tb0).rgb, gTo);',
+    '    if (uCndFrom > 0.5) a0 = candles(a0, ta0, uAspFrom);',
+    '    if (uCndTo > 0.5) b0 = candles(b0, tb0, uAspTo);',
+    '    col = mix(a0, b0, uP);',
     '  } else {',
     // the change blooms out from the light source; going back to the plain room it closes in from the edges
     '    float dl = clamp(length((uv - uSrc) * vec2(uPlaneAsp, 1.0)) / (0.9 * max(uPlaneAsp, 1.0)), 0.0, 1.0);',
@@ -901,8 +1023,11 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     '    float n = edge + mix(nz.r, mix(dl, 1.0 - dl, uToBase), 0.62) * (1.0 - edge);',
     '    float t = smoothstep(n - edge, n, uP * (1.0 + edge));',
     '    vec2 d = (nz.gb - 0.5) * 0.045;',
-    '    vec3 a = grade(texture2D(tFrom, cover(uv + d * t, uAspFrom)).rgb, gFrom);',
-    '    vec3 b = grade(texture2D(tTo, cover(uv - d * (1.0 - t), uAspTo)).rgb, gTo);',
+    '    vec2 ta1 = cover(uv + d * t, uAspFrom, uFocusFrom), tb1 = cover(uv - d * (1.0 - t), uAspTo, uFocusTo);',
+    '    vec3 a = grade(texture2D(tFrom, ta1).rgb, gFrom);',
+    '    vec3 b = grade(texture2D(tTo, tb1).rgb, gTo);',
+    '    if (uCndFrom > 0.5) a = candles(a, ta1, uAspFrom);',
+    '    if (uCndTo > 0.5) b = candles(b, tb1, uAspTo);',
     '    col = mix(a, b, t);',
     '    float band = t * (1.0 - t) * 4.0;',
     '    col += vec3(1.0, 0.74, 0.46) * band * band * mix(0.24, 0.07, uToBase);',
@@ -957,10 +1082,14 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     order.forEach(texOf);   // upload every texture before the canvas is ever shown
     looks.forEach(texOf);
     if (hero && hero.ready) texOf(hero);
+    if (shootScene) texOf(shootScene);
+    function focusOf(s) { var f = s.focus || [0.5, 0.45]; return new T.Vector2(f[0], 1 - f[1]); }
 
     var u = {
       tFrom: { value: null }, tTo: { value: null }, tNoise: { value: noise },
-      uAspFrom: { value: 1 }, uAspTo: { value: 1 }, uPlaneAsp: { value: 1 }, uFocus: { value: new T.Vector2(0.5, 0.55) },
+      uAspFrom: { value: 1 }, uAspTo: { value: 1 }, uPlaneAsp: { value: 1 }, uFocusFrom: { value: new T.Vector2(0.5, 0.55) }, uFocusTo: { value: new T.Vector2(0.5, 0.55) },
+      uCndFrom: { value: 0 }, uCndTo: { value: 0 }, uAmb: { value: 1 }, uL: { value: [0, 0, 0, 0, 0] },
+      uC: { value: CANDLES.map(function (c) { return new T.Vector3(c.x, c.y, 1); }) },
       uP: { value: 0 }, uFade: { value: 0 }, gFrom: { value: new T.Vector4() }, gTo: { value: new T.Vector4() }, uSweep: { value: -1 },
       uSrc: { value: new T.Vector2(0.5, 0.86) }, uToBase: { value: 0 }
     };
@@ -968,9 +1097,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     scene.add(mesh);
 
     var cur = glScene(current.name), gtx = null, baseW = 1, baseH = 1;
+    var litT0 = cur.candles ? -1e9 : null;   // when the candles started lighting; null while the shoot isn't on screen
     function bind(a, b) {
-      u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a);
-      u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b);
+      u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a); u.uFocusFrom.value = focusOf(a); u.uCndFrom.value = a.candles ? 1 : 0;
+      u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b); u.uFocusTo.value = focusOf(b); u.uCndTo.value = b.candles ? 1 : 0;
     }
     bind(cur, cur);
     view.refresh = function () { if (!gtx) bind(cur, cur); };   // e.g. the phone video's first frame replacing its poster
@@ -979,6 +1109,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       var keep = gtx.target === 1 ? gtx.to : gtx.from, drop = keep === gtx.to ? gtx.from : gtx.to;
       gtx = null; cur = keep;
       bind(cur, cur); u.uP.value = 0;
+      if (!cur.candles) litT0 = null;
       if (drop !== cur) pause(drop);
     }
     function go3(s, instant) {
@@ -994,7 +1125,8 @@ h1 .w-the{font-style:italic;margin-right:.04em}
         finish();
       }
       if (s === cur) return;
-      if (instant) { var was = cur; cur = s; bind(s, s); u.uP.value = 0; if (was !== s) pause(was); return; }
+      if (s.candles) litT0 = instant || reduceMQ.matches ? -1e9 : performance.now();
+      if (instant) { var was = cur; cur = s; bind(s, s); u.uP.value = 0; if (was !== s) pause(was); if (!s.candles) litT0 = null; return; }
       var reduced = reduceMQ.matches;
       gtx = { from: cur, to: s, p0: 0, target: 1, t0: performance.now(), full: reduced ? REDUCED_FADE : DUR };
       gtx.dur = gtx.full;
@@ -1069,6 +1201,11 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       var sw = (clock + 7) % 12;                                    // first sweep ~5s in, then every 12s
       u.uSweep.value = reduced || sw >= 3.6 ? -1 : easeInOut(sw / 3.6);
 
+      if (litT0 !== null) {
+        var lv = candleLevels(now - litT0, now / 1000, reduced);
+        for (var ci = 0; ci < lv.L.length; ci++) u.uL.value[ci] = lv.L[ci];
+        u.uAmb.value = lv.amb;
+      }
       renderer.render(scene, camera);
       view.frames = (view.frames || 0) + 1;
       if (!view.live) goLive();
