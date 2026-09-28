@@ -34,7 +34,7 @@ a{color:inherit}
    The <img>/<video> is the real shot; the gradient behind it is the fallback and shares the same composition. */
 .scene{--focus:50% 45%;position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
   transform-origin:var(--focus);will-change:transform;
-  animation:drift 20s cubic-bezier(.45,0,.55,1) infinite alternate;
+  animation:drift 20s linear infinite alternate;
   --l-tube:radial-gradient(17% 1.1% at 58% 12%,#f4f8ff 0 45%,rgb(244 248 255 / 0) 100%);
   --l-wash:radial-gradient(75% 48% at 58% 10%,rgb(214 226 245 / .26),rgb(214 226 245 / 0) 70%);
   --l-plain:linear-gradient(180deg,#707478 0%,#63676b 65.9%,#7a7773 66%,#5b5855 100%);
@@ -64,9 +64,9 @@ a{color:inherit}
 .m-style{background:var(--l-linen),var(--l-plant),var(--l-print),var(--l-bulb),var(--l-pool),var(--l-floor),var(--l-strip),var(--l-planks),var(--l-room)}
 .m-shoot{background:var(--l-vignette),var(--l-linen),var(--l-plant),var(--l-print),var(--l-bulb),var(--l-pool),var(--l-pool),var(--l-floor),var(--l-strip),var(--l-planks),var(--l-room)}
 /* the wipe's leading edge — a soft band of warm light on the incoming side */
-.seam{position:absolute;top:0;bottom:0;width:min(22vw,240px);opacity:0;pointer-events:none}
-.win.fwd .seam{right:0;background:linear-gradient(90deg,rgb(255 208 160 / 0),rgb(255 208 160 / .09) 72%,rgb(255 226 196 / .2) calc(100% - 1px),rgb(255 238 220 / .7) calc(100% - 1px))}
-.win.rev .seam{left:0;background:linear-gradient(270deg,rgb(255 208 160 / 0),rgb(255 208 160 / .09) 72%,rgb(255 226 196 / .2) calc(100% - 1px),rgb(255 238 220 / .7) calc(100% - 1px))}
+.seam{position:absolute;top:0;bottom:0;width:min(26vw,300px);opacity:0;pointer-events:none;mix-blend-mode:screen}
+.win.fwd .seam{right:0;background:linear-gradient(90deg,rgb(255 196 140 / 0),rgb(255 196 140 / .16) 70%,rgb(255 222 188 / .38) calc(100% - 2px),rgb(255 242 228 / .95) calc(100% - 2px))}
+.win.rev .seam{left:0;background:linear-gradient(270deg,rgb(255 196 140 / 0),rgb(255 196 140 / .16) 70%,rgb(255 222 188 / .38) calc(100% - 2px),rgb(255 242 228 / .95) calc(100% - 2px))}
 .cell.pending{opacity:.4;cursor:progress}
 .grain{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.14;
   background-image:url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E')}
