@@ -8,7 +8,7 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   box-sizing:border-box;
@@ -100,23 +100,27 @@ h1 span:nth-child(2){transition-delay:70ms}
 h1 span:nth-child(3){transition-delay:140ms}
 .stage.title-hidden h1 span{opacity:0;filter:blur(12px);transform:translateY(-10px)}
 h1 .w-the{font-style:italic;margin-right:.04em}
-.tagline{margin:14px 0 0;font:italic 400 clamp(18px,2vw,26px)/1.25 'Instrument Serif',serif;letter-spacing:-.005em;
-  color:rgba(255,255,255,.88);text-shadow:0 1px 10px rgb(0 0 0 / .35);
+/* tagline, after the "LONELY" reference: thin wide-tracked capitals. A small stroke falls, the letters arrive together,
+   hold, then slip away one at a time and the stroke returns. Letters are split by JS; the text itself stays in aria-label. */
+.tagline{position:relative;margin:18px 0 0;padding-left:.44em;font:300 clamp(11px,1.05vw,14px)/1.7 'Manrope',sans-serif;
+  letter-spacing:.44em;text-transform:uppercase;color:rgba(255,255,255,.92);text-shadow:0 1px 10px rgb(0 0 0 / .5);
   transition:opacity 600ms var(--ease) 60ms,filter 600ms var(--ease) 60ms,transform 600ms var(--ease) 60ms}
-.tw{display:inline-block}
+.tw{display:inline-block;white-space:nowrap}
+.tc{display:inline-block}
+.js .tagline.split .tc{opacity:0}
+.tick{position:absolute;left:50%;top:50%;width:.62em;height:.62em;margin:-.5em 0 0 -.31em;opacity:0;pointer-events:none;
+  border-right:1px solid currentColor;border-bottom:1px solid currentColor}
 .stage.title-hidden .tagline{opacity:0;filter:blur(8px);transform:translateY(-8px)}
 
 /* entrance, once: letters rise out of a blur, then warm light passes through them; the tagline settles word by word */
-.js .stage:not(.intro) h1 .ch,.js .stage:not(.intro) .tw,.js .stage:not(.intro) .eyebrow{opacity:0}
+.js .stage:not(.intro) h1 .ch,.js .stage:not(.intro) .eyebrow{opacity:0}
 @keyframes drop-rise{0%{opacity:0;transform:translateY(.42em);filter:blur(12px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
 @keyframes drop-glint{0%,100%{color:#fff}45%{color:#ffd9ab;text-shadow:0 0 22px rgb(255 186 112 / .6),0 2px 14px rgb(0 0 0 / .3)}}
-@keyframes tag-rise{from{opacity:0;transform:translateY(.5em);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @keyframes eyebrow-in{from{opacity:0}to{opacity:1}}
 .stage.intro h1 .ch{animation:drop-rise 1100ms var(--ease) backwards,drop-glint 1300ms ease-in-out backwards;
   animation-delay:calc(var(--i) * 60ms + 80ms),calc(var(--i) * 70ms + 1000ms)}
-.stage.intro .tw{animation:tag-rise 800ms var(--ease) backwards;animation-delay:calc(var(--i) * 45ms + 650ms)}
 .stage.intro .eyebrow{animation:eyebrow-in 900ms var(--ease) backwards}
-.stage.title-hidden h1 .ch,.stage.title-hidden .tw,.stage.instant-title h1 .ch,.stage.instant-title .tw,.stage.instant-title .eyebrow{animation:none}
+.stage.title-hidden h1 .ch,.stage.instant-title h1 .ch,.stage.instant-title .eyebrow{animation:none}
 .sub{width:min(600px,100%);margin:16px auto 0;
   font-size:clamp(13px,1.2vw,16px);line-height:1.5;letter-spacing:-.02em;color:rgba(255,255,255,.8);
   text-shadow:0 1px 8px rgb(0 0 0 / .3);
@@ -192,11 +196,84 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   font:600 14px 'Manrope',sans-serif;letter-spacing:.02em;
   transition:transform 200ms var(--ease),background 260ms,border-color 260ms,color 260ms}
 .btn:active{transform:scale(.98)}
-.btn-pay{background:var(--red);color:#fff;box-shadow:0 10px 30px rgb(229 35 27 / .32)}
-.btn-pay:hover{background:#ff2f24}
-.btn-pdf{background:rgb(255 255 255 / .08);color:#fff;border:1px solid rgb(255 255 255 / .28);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.btn-pdf:hover{background:rgb(255 255 255 / .16);border-color:rgb(255 255 255 / .5)}
+.btn .lbl{display:inline-block;white-space:nowrap}
+.btn .lc{display:inline-block;white-space:pre}
+@property --spin{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+/* Pay, after the "RELICS" reference: black glass, a red-and-blue chromatic edge that slowly turns, letters with a
+   chromatic fringe. Every few seconds (and on hover) the letters melt into blurred outlines and re-form. */
+.btn-pay{position:relative;isolation:isolate;color:#fff;text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:700;
+  background:rgb(12 6 8 / .62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:0 0 22px rgb(229 35 27 / .34),0 0 0 1px rgb(229 35 27 / .35),inset 0 0 16px rgb(229 35 27 / .2)}
+.btn-pay::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;z-index:-1;pointer-events:none;
+  background:conic-gradient(from var(--spin),#ff3b2f,#ff8a7a 18%,#6aa8ff 32%,#3b6bff 45%,#ff3b2f 60%,#ffb0a4 78%,#ff3b2f);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;animation:spin 6s linear infinite}
+@keyframes spin{to{--spin:360deg}}
+.btn-pay .lc{-webkit-text-stroke:.5px rgb(255 120 110 / .55);
+  text-shadow:-.07em 0 rgb(255 55 45 / .8),.07em 0 rgb(90 150 255 / .75),0 0 12px rgb(255 60 50 / .35)}
+.btn-pay svg{filter:drop-shadow(-1px 0 rgb(255 55 45 / .8)) drop-shadow(1px 0 rgb(90 150 255 / .7))}
+.btn-pay:hover{background:rgb(40 8 10 / .7);box-shadow:0 0 30px rgb(229 35 27 / .5),0 0 0 1px rgb(229 35 27 / .5),inset 0 0 22px rgb(229 35 27 / .3)}
+
+/* Download, after the "EVOKE" reference: an outline that draws itself, letters that gather from loose strokes as
+   hollow outlines and then fill; now and then they fade out left to right and gather again. */
+.btn-pdf{position:relative;color:#fff;text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:600;
+  background:rgb(0 0 0 / .38);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.btn-pdf .edge{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.btn-pdf .edge rect{fill:none;stroke:rgb(255 255 255 / .55);stroke-width:1;stroke-dasharray:1 0}
+.btn-pdf .edge .run{stroke:#fff;stroke-width:1.4;stroke-dasharray:.07 .93;opacity:0;filter:drop-shadow(0 0 3px #fff)}
+.btn-pdf .lc{-webkit-text-stroke:.6px #fff}
+.btn-pdf:hover{background:rgb(255 255 255 / .1)}
+.btn-pdf:hover .edge rect:first-child{stroke:rgb(255 255 255 / .85)}
+.js .btn-pdf.pre .lc{opacity:0}
+.js .btn-pdf.pre .edge rect:first-child{stroke-dasharray:0 1}
+
+/* "Download The Drop to know more", after the "MOON" reference: thin spaced capitals, the O of DROP runs through
+   the phases of the moon, and a few stars blink around the line. */
+.know{position:relative;display:inline-block;margin:-10px 0 -6px;padding:0 10px 0 calc(10px + .36em);
+  font:300 11px/16px 'Manrope',sans-serif;letter-spacing:.36em;text-transform:uppercase;white-space:nowrap;
+  color:rgba(255,255,255,.8);text-decoration:none;text-shadow:0 1px 8px rgb(0 0 0 / .5);transition:color 300ms}
+.know:hover,.know:focus-visible{color:#fff}
+@property --ph{syntax:'<number>';inherits:false;initial-value:0}
+.moon{position:relative;display:inline-block;width:.74em;height:.74em;margin:0 .06em;vertical-align:-.02em;border-radius:50%;
+  box-shadow:inset 0 0 0 .75px currentColor}
+.moon::before{content:"";position:absolute;inset:0;border-radius:50%;background:#fff;box-shadow:0 0 6px rgb(255 255 255 / .7);
+  --ph:1;-webkit-mask:radial-gradient(circle .37em at calc(50% + var(--ph) * .74em) 50%,#0000 98%,#000);
+          mask:radial-gradient(circle .37em at calc(50% + var(--ph) * .74em) 50%,#0000 98%,#000);
+  animation:phase 7s ease-in-out infinite}
+@keyframes phase{0%{--ph:0}40%{--ph:1}50%{--ph:1}50.01%{--ph:-1}60%{--ph:-1}100%{--ph:0}}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.15;
+  animation:twinkle var(--t,3s) ease-in-out var(--d,0s) infinite}
+@keyframes twinkle{0%,100%{opacity:.12;transform:scale(.6)}50%{opacity:.95;transform:scale(1.2)}}
+@media (max-width:360px){.know{letter-spacing:.24em;padding-left:calc(10px + .24em);font-size:10.5px}}
+
+/* Loader, after the infinity reference: shown when the connection drops, or when the first load is crawling. */
+.net{position:fixed;inset:0;z-index:100;display:grid;place-items:center;align-content:center;gap:18px;padding:24px;text-align:center;
+  background:repeating-radial-gradient(circle at 50% 46%,rgb(255 255 255 / .018) 0 1px,rgb(0 0 0 / 0) 1px 46px),
+    radial-gradient(60% 50% at 50% 46%,#0b0d1d 0,#030308 60%,#000 100%);
+  opacity:0;visibility:hidden;transition:opacity 500ms var(--ease),visibility 0s linear 500ms}
+.net.show{opacity:1;visibility:visible;transition:opacity 500ms var(--ease),visibility 0s}
+.net svg{width:min(200px,50vw);height:auto;overflow:visible}
+.net .trk{fill:none;stroke:rgb(255 255 255 / .05);stroke-width:5}
+.net .cm{fill:none;stroke:currentColor;stroke-linecap:round;color:#7b5cff;animation:hue 6s linear infinite}
+.net .c1{stroke-width:5;filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 0 14px currentColor)}
+.net .c2{stroke-width:3.2;opacity:.55}
+.net .c3{stroke-width:1.6;opacity:.25}
+.net .head{fill:#fff}
+@keyframes hue{0%,100%{color:#7b5cff}33%{color:#3fe0d0}66%{color:#5a86ff}}
+.net-t{margin:0;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.net-m{margin:0;max-width:300px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.7)}
+.net-m:empty{display:none}
+.net button{justify-self:center;height:36px;padding:0 18px;border-radius:999px;border:1px solid rgb(255 255 255 / .3);background:transparent;
+  color:#fff;font:500 12px 'Manrope',sans-serif;letter-spacing:.04em;cursor:pointer}
+.net button:hover{border-color:#fff}
+.net button[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){
+  .btn-pay::before,.moon::before,.star,.net .cm{animation:none}
+  .moon::before{--ph:.55}
+  .star{opacity:.5}
+}
 
 .after{display:inline-flex;align-items:center;gap:9px;
   margin:4px 0 0;padding:8px 15px;border-radius:999px;max-width:100%;
@@ -222,6 +299,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   .try{height:32px;padding:0 13px;font-size:12px}
   .mark{font-size:17px}
   .eyebrow{font-size:10px;letter-spacing:.26em}
+  .tagline{margin-top:10px;font-size:10.5px;line-height:16px;letter-spacing:.3em;padding-left:.3em}
   .controller{height:146px;margin-top:clamp(22px,4vh,40px)}
   .track{top:0;height:146px;border-radius:26px}
   .cells{grid-template-columns:1fr 1fr;grid-template-rows:44px 51px 51px;align-items:stretch}
@@ -246,7 +324,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 }
 @media (prefers-reduced-motion:reduce){
   .capsule,.track,.cell,h1 span,.caption,.btn,.sub,.tagline{transition-duration:1ms!important;transition-delay:0ms!important}
-  .stage.intro h1 .ch,.stage.intro .tw,.stage.intro .eyebrow{animation:none}
+  .stage.intro h1 .ch,.stage.intro .eyebrow{animation:none}
   h1 span{filter:none!important}
 }
 @media (prefers-reduced-motion:reduce){
@@ -301,11 +379,18 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   .foot{grid-area:5 / 1;align-self:end;margin:0 auto;padding-top:12px;gap:8px}
   .eyebrow,.sub{display:none}
   h1{font-size:clamp(30px,5vw,40px)}
-  .tagline{margin-top:4px;font-size:15px;line-height:18px}
+  .tagline{margin-top:4px;font-size:10.5px;line-height:14px;letter-spacing:.3em;padding-left:.3em}
+  .ctas{gap:8px}
+  .btn{height:46px}
+  .after{padding-top:6px;padding-bottom:6px}
+  .know{margin-top:-6px;line-height:14px}
 }
 @media (max-width:700px) and (max-height:830px){.hero{min-height:52px}}
 /* phones in landscape */
+@media (max-height:760px) and (min-height:701px){.foot{gap:10px}}
 @media (max-height:420px){
+  .btn{height:46px}
+  .know{margin-top:-5px}
   header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px}
   .stage{padding-top:calc(50px + env(safe-area-inset-top,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
   h1{font-size:26px}
@@ -397,7 +482,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   <div class="hero">
     <div class="eyebrow">Red Flag Homes Network · Studio Noir</div>
     <h1 aria-label="The Drop"><span class="w w-the" aria-hidden="true"><span class="ch" style="--i:0">T</span><span class="ch" style="--i:1">h</span><span class="ch" style="--i:2">e</span></span> <span class="w" aria-hidden="true"><span class="ch" style="--i:3">D</span><span class="ch" style="--i:4">r</span><span class="ch" style="--i:5">o</span><span class="ch" style="--i:6">p</span></span></h1>
-    <p class="tagline"><span class="tw" style="--i:0">From</span> <span class="tw" style="--i:1">bare</span> <span class="tw" style="--i:2">walls</span> <span class="tw" style="--i:3">to</span> <span class="tw" style="--i:4">booked</span> <span class="tw" style="--i:5">—</span> <span class="tw" style="--i:6">in</span> <span class="tw" style="--i:7">fifteen</span> <span class="tw" style="--i:8">days.</span></p>
+    <p class="tagline" aria-label="From bare walls to booked — in fifteen days.">From bare walls to booked — in fifteen days.</p>
     <p class="sub">One room. One delivery. 85+ pieces sourced, delivered, installed, styled and photographed — you unlock the door once and we hand it back finished.</p>
   </div>
 
@@ -428,13 +513,15 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     <div class="ctas">
       <a class="btn btn-pay" id="pay" href="#" target="_blank" rel="noopener">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>
-        Pay 10% and book now
+        <span class="lbl">Pay 10% and book now</span>
       </a>
       <a class="btn btn-pdf" id="pdf" href="#" download>
+        <svg class="edge" aria-hidden="true"><rect pathLength="1"/><rect class="run" pathLength="1"/></svg>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg>
-        Download The Drop
+        <span class="lbl">Download The Drop</span>
       </a>
     </div>
+    <a class="know js-pdf" id="know" href="#" download aria-label="Download The Drop to know more">Download the Dr<span class="moon" aria-hidden="true"></span><span class="sr">o</span>p to know more</a>
     <p class="after">
       <span class="dot" aria-hidden="true"></span>
       <span><a href="/franchise" target="_blank" rel="noopener">Want us to run it after handover?</a> <b>Zero onboarding cost. 8% commission, for life.</b></span>
@@ -449,6 +536,18 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   </header>
 
   <p class="sr" role="status" aria-live="polite" id="live"></p>
+</div>
+
+<div class="net" id="net" role="alertdialog" aria-modal="false" aria-labelledby="net-t" aria-describedby="net-m">
+  <svg viewBox="0 0 160 80" aria-hidden="true">
+    <path class="trk" d="M80 40C70 18 38 18 38 40s32 22 42 0 42-22 42 0-32 22-42 0Z"/>
+    <path class="cm c3" pathLength="1" d="M80 40C70 18 38 18 38 40s32 22 42 0 42-22 42 0-32 22-42 0Z"/>
+    <path class="cm c2" pathLength="1" d="M80 40C70 18 38 18 38 40s32 22 42 0 42-22 42 0-32 22-42 0Z"/>
+    <path class="cm c1" pathLength="1" d="M80 40C70 18 38 18 38 40s32 22 42 0 42-22 42 0-32 22-42 0Z"/>
+  </svg>
+  <p class="net-t" id="net-t">Loading…</p>
+  <p class="net-m" id="net-m"></p>
+  <button type="button" id="net-x" hidden>Keep browsing</button>
 </div>
 
 
@@ -1413,7 +1512,11 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   }
 
   (function () {
-    var go = function () { if (!stage.classList.contains('picked')) stage.classList.add('intro'); else stage.classList.add('intro', 'instant-title'); };
+    var go = function () {
+      var instant = stage.classList.contains('picked');
+      stage.classList.add('intro'); if (instant) stage.classList.add('instant-title');
+      stage.dispatchEvent(new CustomEvent('drop:intro', { detail: { instant: instant } }));
+    };
     var fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
     Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(go, go);
   })();
@@ -1425,8 +1528,192 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   if (RAZORPAY) { pay.href = RAZORPAY; } else {
     pay.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Razorpay link not set yet.'; });
   }
-  if (PDF) { pdf.href = PDF; } else {
-    pdf.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Brochure link not set yet.'; });
+  var know = document.getElementById('know');
+  if (PDF) { pdf.href = PDF; know.href = PDF; } else {
+    [pdf, know].forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); live.textContent = 'Brochure link not set yet.'; }); });
+  }
+})();
+</script>
+<script>
+/* Type and button motion from the five references, plus the connection loader. Everything here is decoration:
+   with scripts off, or reduced motion on, the words simply sit still and stay readable. */
+(function () {
+  var stage = document.getElementById('stage');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var canAnimate = !!Element.prototype.animate;
+  var rnd = function (a, b) { return a + Math.random() * (b - a); };
+  var shuffle = function (a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  var later = function (fn, ms) {   // a timer that waits out hidden tabs instead of firing into them
+    return setTimeout(function run() { if (document.hidden) { document.addEventListener('visibilitychange', function v() { if (!document.hidden) { document.removeEventListener('visibilitychange', v); run(); } }); } else fn(); }, ms);
+  };
+
+  // split text into word groups of letter spans; spaces stay real text so lines break between words only
+  function split(el, cls) {
+    var text = el.textContent.trim(), out = [];
+    el.textContent = '';
+    text.split(' ').forEach(function (w, wi) {
+      if (wi) el.appendChild(document.createTextNode(' '));
+      var word = document.createElement('span'); word.className = cls === 'tc' ? 'tw' : 'lw'; word.setAttribute('aria-hidden', 'true');
+      if (cls !== 'tc') word.style.whiteSpace = 'pre';
+      Array.prototype.forEach.call(w, function (c) { var s = document.createElement('span'); s.className = cls; s.textContent = c; word.appendChild(s); out.push(s); });
+      el.appendChild(word);
+    });
+    return out;
+  }
+
+  /* ---- tagline: "LONELY" ---- */
+  var tag = document.querySelector('.tagline');
+  var tcs = split(tag, 'tc');
+  var tick = document.createElement('span'); tick.className = 'tick'; tick.setAttribute('aria-hidden', 'true'); tag.appendChild(tick);
+  function showAll() { tcs.forEach(function (c) { c.style.opacity = 1; }); }
+  function tagCycle(first) {
+    if (reduce.matches || !canAnimate) { showAll(); return; }
+    // the stroke falls and tips over, then the letters come in together, each a beat apart
+    tick.animate([
+      { opacity: 0, transform: 'translateY(-6px) rotate(0deg)' },
+      { opacity: 1, transform: 'translateY(0) rotate(0deg)', offset: .2 },
+      { opacity: 1, transform: 'translateY(1px) rotate(-18deg)', offset: .75 },
+      { opacity: 0, transform: 'translateY(4px) rotate(-32deg)' }
+    ], { duration: first ? 1100 : 1500, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' });
+    var inAt = first ? 900 : 1300;
+    tcs.forEach(function (c) {
+      c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: inAt + rnd(0, 260), easing: 'ease-out', fill: 'both' });
+    });
+    // hold, then the letters slip away one at a time and the stroke returns
+    later(function () {
+      var order = shuffle(tcs);
+      order.forEach(function (c, i) {
+        c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, delay: i * 36 + rnd(0, 60), easing: 'ease-in', fill: 'both' });
+      });
+      later(function () { tagCycle(false); }, order.length * 36 + 500);
+    }, inAt + 11000);
+  }
+  tag.classList.add('split');
+  var started = false;
+  function start(instant) {
+    if (started) return; started = true;
+    if (instant) { showAll(); later(function () { tagCycle(false); }, 9000); } else later(function () { tagCycle(true); }, 450);
+  }
+  stage.addEventListener('drop:intro', function (e) { start(e.detail && e.detail.instant); });
+  if (stage.classList.contains('intro')) start(stage.classList.contains('instant-title'));
+
+  /* ---- Pay: "RELICS" ---- */
+  var pay = document.getElementById('pay');
+  pay.setAttribute('aria-label', 'Pay 10% and book now');
+  var pcs = split(pay.querySelector('.lbl'), 'lc');
+  var melting = false;
+  function melt() {
+    if (melting || reduce.matches || !canAnimate) return;
+    melting = true;
+    var end = 0;
+    pcs.forEach(function (c) {
+      var dx = rnd(-5, 5), dy = rnd(-3, 3), d = rnd(0, 260); end = Math.max(end, d);
+      c.animate([
+        { transform: 'none', filter: 'blur(0)', color: '#fff' },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scaleX(1.25)', filter: 'blur(2.6px)', color: 'rgba(255,255,255,0)', offset: .45 },
+        { transform: 'translate(' + (-dx / 2) + 'px,0) scaleX(1.08)', filter: 'blur(1px)', color: 'rgba(255,255,255,.3)', offset: .7 },
+        { transform: 'none', filter: 'blur(0)', color: '#fff' }
+      ], { duration: 1500, delay: d, easing: 'cubic-bezier(.65,0,.35,1)' });
+    });
+    setTimeout(function () { melting = false; }, 1500 + end);
+  }
+  pay.addEventListener('mouseenter', melt);
+  pay.addEventListener('focus', melt);
+  (function loop() { later(function () { melt(); loop(); }, 7000); })();
+
+  /* ---- Download: "EVOKE" ---- */
+  var pdf = document.getElementById('pdf');
+  pdf.setAttribute('aria-label', 'Download The Drop');
+  var dcs = split(pdf.querySelector('.lbl'), 'lc');
+  var edge = pdf.querySelector('.edge'), rects = edge.querySelectorAll('rect');
+  function fitEdge() {
+    var w = pdf.offsetWidth, h = pdf.offsetHeight;
+    Array.prototype.forEach.call(rects, function (r) {
+      r.setAttribute('x', .5); r.setAttribute('y', .5); r.setAttribute('width', Math.max(0, w - 1)); r.setAttribute('height', Math.max(0, h - 1));
+      r.setAttribute('rx', (h - 1) / 2); r.setAttribute('ry', (h - 1) / 2);
+    });
+  }
+  fitEdge();
+  if (window.ResizeObserver) new ResizeObserver(fitEdge).observe(pdf); else addEventListener('resize', fitEdge);
+  function gather(delay) {
+    dcs.forEach(function (c, i) {
+      c.animate([
+        { opacity: 0, transform: 'translate(' + rnd(-16, 16) + 'px,' + rnd(-12, 12) + 'px) rotate(' + rnd(-50, 50) + 'deg) scale(1.4)', filter: 'blur(2px)', color: 'rgba(255,255,255,0)' },
+        { opacity: 1, transform: 'none', filter: 'blur(0)', color: 'rgba(255,255,255,0)', offset: .6 },
+        { opacity: 1, transform: 'none', filter: 'blur(0)', color: '#fff' }
+      ], { duration: 1500, delay: delay + i * 35 + rnd(0, 180), easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' });
+    });
+  }
+  function evoke(first) {
+    if (reduce.matches || !canAnimate) { pdf.classList.remove('pre'); return; }
+    if (first) {
+      rects[0].animate([{ strokeDasharray: '0 1' }, { strokeDasharray: '1 0' }], { duration: 1600, delay: 200, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'backwards' });
+      pdf.classList.remove('pre');
+      gather(500);
+    }
+    // a bright stroke runs once around the edge, the letters empty to outlines and fade left to right, then gather again
+    later(function () {
+      rects[1].animate([{ opacity: 0, strokeDashoffset: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0, strokeDashoffset: -1 }], { duration: 1800, easing: 'linear' });
+      var fades = dcs.map(function (c, i) {
+        return c.animate([{ color: '#fff', opacity: 1 }, { color: 'rgba(255,255,255,0)', opacity: 1, offset: .5 }, { color: 'rgba(255,255,255,0)', opacity: 0 }],
+          { duration: 700, delay: i * 45, easing: 'ease-in', fill: 'forwards' });
+      });
+      later(function () { gather(0); fades.forEach(function (a) { a.cancel(); }); evoke(false); }, dcs.length * 45 + 750);
+    }, first ? 9000 : 10000);
+  }
+  pdf.classList.add('pre');
+  // start alongside the title, not before the page has had a chance to settle
+  later(function () { evoke(true); }, 900);
+
+  /* ---- "Download The Drop to know more": "MOON" stars ---- */
+  var know = document.getElementById('know');
+  [[-3, 20, 2.6, 0], [8, 88, 3.4, .8], [-6, 60, 2.2, 1.6], [104, 36, 3, .4], [96, 74, 2.8, 2.1], [48, -8, 3.6, 1.2], [30, 108, 2.4, 2.6]].forEach(function (a) {
+    var st = document.createElement('span'); st.className = 'star'; st.setAttribute('aria-hidden', 'true');
+    st.style.cssText = 'left:' + a[0] + '%;top:' + a[1] + '%;--t:' + a[2] + 's;--d:' + a[3] + 's';
+    know.appendChild(st);
+  });
+
+  /* ---- connection loader: infinity ---- */
+  var net = document.getElementById('net'), netT = document.getElementById('net-t'), netM = document.getElementById('net-m'), netX = document.getElementById('net-x');
+  var comets = net.querySelectorAll('.cm'), cometAnims = [];
+  [[.34, 0], [.22, 0], [.1, 0]].forEach(function (L, i) { comets[i].style.strokeDasharray = L[0] + ' 2'; });
+  function spin(on) {
+    if (!canAnimate) return;
+    if (!on || reduce.matches) {
+      cometAnims.forEach(function (a) { a.cancel(); }); cometAnims = [];
+      if (reduce.matches) Array.prototype.forEach.call(comets, function (c) { c.style.strokeDasharray = '1 0'; });
+      return;
+    }
+    if (cometAnims.length) return;
+    // three strokes of falling width and brightness share one head, so the light leaves a tail as it runs the loop
+    [.34, .22, .1].forEach(function (L, i) {
+      cometAnims.push(comets[i].animate([{ strokeDashoffset: L }, { strokeDashoffset: L - 1 }], { duration: 2400, iterations: Infinity, easing: 'linear' }));
+    });
+  }
+  var dismissed = false, slow = false;   // slow: the loader is up for a crawling first load
+  function showNet(title, msg, canDismiss) {
+    netT.textContent = title; netM.textContent = msg || ''; netX.hidden = !canDismiss;
+    net.classList.add('show'); spin(true);
+  }
+  function hideNet() { net.classList.remove('show'); setTimeout(function () { if (!net.classList.contains('show')) spin(false); }, 600); }
+  function offline() {
+    if (dismissed) return;
+    showNet('Waiting for connection…', 'You’re offline. We’ll pick up the moment you’re back.', true);
+    live.textContent = 'You are offline.';
+  }
+  var live = document.getElementById('live');
+  netX.addEventListener('click', function () { dismissed = true; slow = false; hideNet(); });
+  addEventListener('offline', function () { dismissed = false; offline(); });
+  addEventListener('online', function () { dismissed = false; if (!slow) hideNet(); else showNet('Loading…', '', false); live.textContent = 'Back online.'; });
+  if (navigator.onLine === false) offline();
+  // first load crawling (weak signal): show the loader until the page has what it needs, at most twelve seconds
+  if (document.readyState !== 'complete') {
+    var slowT = setTimeout(function () {
+      slow = true;
+      if (!net.classList.contains('show')) showNet('Loading…', '', false);
+      setTimeout(function () { if (slow && netT.textContent === 'Loading…') { netX.hidden = false; netM.textContent = 'This is taking a while on your connection.'; } }, 12000);
+    }, 1500);
+    addEventListener('load', function () { clearTimeout(slowT); if (slow) { slow = false; if (navigator.onLine !== false) hideNet(); } });
   }
 })();
 </script>
