@@ -334,6 +334,22 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 @keyframes flicker{0%,100%{opacity:.92;transform:scale(1)}20%{opacity:.8;transform:scale(.97)}45%{opacity:1;transform:scale(1.04)}70%{opacity:.86;transform:scale(.99)}}
 .shoot-wrap.instant-lit img.shoot-img,.shoot-wrap.instant-lit .cndl::before{transition:none}
 .shoot-wrap.instant-lit .cndl::after{animation:flicker 2.4s ease-in-out infinite;opacity:.92;transform:none}
+/* Styling: the photo starts drained of its red; the strips stutter on, sweep along their length, and the red returns */
+.style-wrap{position:absolute;inset:0;z-index:1;overflow:hidden}
+.media img.style-img{filter:brightness(.36) saturate(0)}
+.style-wrap.lit img.style-img{animation:power-on 1700ms var(--ease) 150ms both}
+@keyframes power-on{0%{filter:brightness(.36) saturate(0)}4%{filter:brightness(.8) saturate(.8)}8%{filter:brightness(.4) saturate(.1)}11%{filter:brightness(.85) saturate(.9)}16%{filter:brightness(.45) saturate(.25)}100%{filter:brightness(1) saturate(1)}}
+.strip{position:absolute;height:calc(var(--dh) * .012);margin-top:calc(var(--dh) * -.006);border-radius:99px;pointer-events:none;
+  background:rgb(255 50 30);box-shadow:0 0 calc(var(--dh) * .03) calc(var(--dh) * .01) rgb(255 30 10 / .7);mix-blend-mode:screen;
+  transform-origin:0 50%;transform:rotate(var(--rot)) scaleX(0);opacity:0}
+.style-wrap.lit .strip{animation:strip-on 700ms var(--ease) var(--d) both}
+@keyframes strip-on{0%{opacity:1;transform:rotate(var(--rot)) scaleX(0)}8%{opacity:.2}14%{opacity:1}22%{opacity:.35}30%{opacity:1}100%{opacity:.5;transform:rotate(var(--rot)) scaleX(1)}}
+.style-wrap.instant-lit img.style-img{animation:none;filter:none}
+.style-wrap.instant-lit .strip{animation:none;opacity:0}
+@media (prefers-reduced-motion:reduce){
+  .style-wrap.lit img.style-img{animation:none;filter:none}
+  .style-wrap.lit .strip{animation:none;opacity:0}
+}
 @media (prefers-reduced-motion:reduce){
   .media img.shoot-img,.cndl::before{transition:none}
   .shoot-wrap.lit .cndl::after,.shoot-wrap.instant-lit .cndl::after{animation:none;opacity:.92;transform:none}
@@ -488,6 +504,13 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     { x: 0.920, y: 0.367, d: 250 }, { x: 0.952, y: 0.372, d: 520 }, { x: 0.993, y: 0.364, d: 900 },
     { x: 0.052, y: 0.416, d: 700 }, { x: 0.008, y: 0.421, d: 1050 }
   ];
+  // "Styling": this photo, with its red LED strips powering on as the stage arrives
+  var STYLING = { src: 'drop/studio-noir/styling-red.jpg', focus: [0.4, 0.46] };
+  // strip ends in the photo (0–1 from the bottom-left): the ceiling cove, then the headboard; d = when each powers on, in ms
+  var STRIPS = [
+    { a: [0.682, 0.954], b: [0.277, 0.879], d: 150 },
+    { a: [0.261, 0.458], b: [0.688, 0.458], d: 600 }
+  ];
   var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js';
   var STORE_KEY = 'redflag:the-drop:studio-noir:stage';
   var GL_PARAM = (/[?&]gl=(\w+)/.exec(location.search) || [])[1];   // "off" / "force" — for testing only
@@ -589,65 +612,98 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       if (gl && gl.refresh) gl.refresh();
     }, { once: true });
   }
-  /* "The shoot" photo, with a CSS rendition of the candles for the no-WebGL path */
-  var shootScene = null, shootSettled = !SHOOT, shootWrap = null, unlightT = 0;
-  if (SHOOT) {
-    var shootImg = new Image();
-    shootImg.decoding = 'async';
-    shootImg.src = SHOOT.src;
-    (shootImg.decode ? shootImg.decode() : Promise.reject()).then(function () {
-      shootWrap = document.createElement('div');
-      shootWrap.className = 'shoot-wrap';
-      var el = shootImg.cloneNode();
+  /* Photos that light up when their stage arrives — "The shoot" (candles) and "Styling" (red LED strips) —
+     each with a CSS rendition of its lights for the no-WebGL path */
+  var LIT = {};
+  setupLit('shoot', SHOOT, 'candles');
+  setupLit('style', STYLING, 'strips');
+  function setupLit(name, cfg, kind) {
+    var L = LIT[name] = { cfg: cfg, kind: kind, scene: null, wrap: null, settled: !cfg, unlightT: 0 };
+    if (!cfg) return;
+    var img = new Image();
+    img.decoding = 'async';
+    img.src = cfg.src;
+    (img.decode ? img.decode() : Promise.reject()).then(function () {
+      var wrap = document.createElement('div');
+      wrap.className = kind === 'candles' ? 'shoot-wrap' : 'style-wrap';
+      var el = img.cloneNode();
       el.alt = '';
-      el.className = 'shoot-img ready';
-      el.style.objectPosition = SHOOT.focus[0] * 100 + '% ' + SHOOT.focus[1] * 100 + '%';
-      shootWrap.appendChild(el);
-      CANDLES.forEach(function (c) {
+      el.className = (kind === 'candles' ? 'shoot-img' : 'style-img') + ' ready';
+      el.style.objectPosition = cfg.focus[0] * 100 + '% ' + cfg.focus[1] * 100 + '%';
+      wrap.appendChild(el);
+      (kind === 'candles' ? CANDLES : STRIPS).forEach(function (c) {
         var f = document.createElement('i');
-        f.className = 'cndl';
+        f.className = kind === 'candles' ? 'cndl' : 'strip';
         f.style.setProperty('--d', c.d + 'ms');
-        shootWrap.appendChild(f);
+        wrap.appendChild(f);
       });
-      scenes.shoot.media.appendChild(shootWrap);
-      shootScene = { name: 'shoot', sample: true, candles: true, media: null, src: shootImg, focus: SHOOT.focus };
-      placeCandles();
-      if (window.ResizeObserver) new ResizeObserver(placeCandles).observe(stage); else window.addEventListener('resize', placeCandles);
-      if (current === scenes.shoot) lightCandles(true);
+      scenes[name].media.appendChild(wrap);
+      L.wrap = wrap;
+      L.scene = { name: name, sample: true, media: null, src: img, focus: cfg.focus, candles: kind === 'candles', strips: kind === 'strips' };
+      placeLit(L);
+      if (window.ResizeObserver) new ResizeObserver(function () { placeLit(L); }).observe(stage);
+      else window.addEventListener('resize', function () { placeLit(L); });
+      if (current === scenes[name]) lightLit(name, true);
     }, function () {}).then(function () {
-      shootSettled = true;
-      enable(scenes.shoot);
+      L.settled = true;
+      enable(scenes[name]);
       bootGL();
     });
   }
-  // The CSS candles sit over the photo's cover crop, so they follow the same maths as object-fit: cover.
-  function placeCandles() {
-    if (!shootWrap) return;
-    var w = shootWrap.clientWidth, h = shootWrap.clientHeight, img = shootScene.src;
+  // The CSS lights sit over the photo's cover crop, so they follow the same maths as object-fit: cover.
+  function placeLit(L) {
+    var wrap = L.wrap;
+    if (!wrap) return;
+    var w = wrap.clientWidth, h = wrap.clientHeight, img = L.scene.src;
     if (!w || !h) return;
     var k = Math.max(w / img.naturalWidth, h / img.naturalHeight), dw = img.naturalWidth * k, dh = img.naturalHeight * k;
-    var ox = (w - dw) * SHOOT.focus[0], oy = (h - dh) * SHOOT.focus[1];
-    shootWrap.style.setProperty('--dh', dh + 'px');
-    [].forEach.call(shootWrap.querySelectorAll('.cndl'), function (f, i) {
-      f.style.left = (ox + CANDLES[i].x * dw) + 'px';
-      f.style.top = (oy + (1 - CANDLES[i].y) * dh) + 'px';
-    });
+    var ox = (w - dw) * L.cfg.focus[0], oy = (h - dh) * L.cfg.focus[1];
+    var X = function (u) { return ox + u * dw; }, Y = function (v) { return oy + (1 - v) * dh; };
+    wrap.style.setProperty('--dh', dh + 'px');
+    if (L.kind === 'candles') {
+      [].forEach.call(wrap.querySelectorAll('.cndl'), function (f, i) {
+        f.style.left = X(CANDLES[i].x) + 'px';
+        f.style.top = Y(CANDLES[i].y) + 'px';
+      });
+    } else {
+      [].forEach.call(wrap.querySelectorAll('.strip'), function (f, i) {
+        var st = STRIPS[i], ax = X(st.a[0]), ay = Y(st.a[1]), bx = X(st.b[0]), by = Y(st.b[1]);
+        f.style.left = ax + 'px';
+        f.style.top = ay + 'px';
+        f.style.width = Math.hypot(bx - ax, by - ay) + 'px';
+        f.style.setProperty('--rot', Math.atan2(by - ay, bx - ax) + 'rad');
+      });
+    }
   }
-  function lightCandles(instant) {
-    clearTimeout(unlightT);
-    if (!shootWrap) return;
-    shootWrap.classList.remove('lit', 'instant-lit');
-    void shootWrap.offsetWidth;   // restart the strike animation on every visit
-    shootWrap.classList.add('lit');
-    if (instant) shootWrap.classList.add('instant-lit');
+  function lightLit(name, instant) {
+    var L = LIT[name];
+    clearTimeout(L.unlightT);
+    if (!L.wrap) return;
+    L.wrap.classList.remove('lit', 'instant-lit');
+    void L.wrap.offsetWidth;   // restart the power-on animation on every visit
+    L.wrap.classList.add('lit');
+    if (instant) L.wrap.classList.add('instant-lit');
   }
-  function unlightCandles() {
-    clearTimeout(unlightT);
-    unlightT = setTimeout(function tick() {
-      if (!shootWrap) return;
-      if (current === scenes.shoot && tx) { unlightT = setTimeout(tick, 200); return; }   // still wiping away
-      if (current !== scenes.shoot) shootWrap.classList.remove('lit', 'instant-lit');
+  function unlightLit(name) {
+    var L = LIT[name];
+    clearTimeout(L.unlightT);
+    L.unlightT = setTimeout(function tick() {
+      if (!L.wrap) return;
+      if (current === scenes[name] && tx) { L.unlightT = setTimeout(tick, 200); return; }   // still wiping away
+      if (current !== scenes[name]) L.wrap.classList.remove('lit', 'instant-lit');
     }, DUR + 150);
+  }
+  // Each strip `since` ms after the stage arrived: [how far along it is lit 0–1, how far its glow has spread, power-on stutter]
+  function stripLevels(since, calm) {
+    return STRIPS.map(function (st) {
+      if (calm) return [1, 1.6, 1];
+      var k = since - st.d;
+      if (k <= 0) return [0, 0, 0];
+      var fl = k < 60 ? 1 : k < 120 ? 0.15 : k < 170 ? 1 : k < 250 ? 0.3 : 1;
+      var sw = Math.min(1, k / 420); sw = 1 - Math.pow(1 - sw, 3);
+      var sp = Math.min(1, Math.max(0, (k - 200) / 1300)); sp = 1 - Math.pow(1 - sp, 2);
+      return [sw, sp * 1.6, fl];
+    });
   }
   // Level of each flame `since` ms after the stage arrived: a quick strike that overshoots, then a soft flicker.
   function candleLevels(since, tSec, calm) {
@@ -673,10 +729,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   function glScene(name) {
     if (name === 'room' && hasLooks()) return looks[lookIdx];
     if (name === 'base' && hero && hero.ready) return hero;
-    if (name === 'shoot' && shootScene) return shootScene;
+    if (LIT[name] && LIT[name].scene) return LIT[name].scene;
     return scenes[name];
   }
-  function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled) && (s.name !== 'shoot' || shootSettled); }
+  function isReady(s) { return s.ready && (s.name !== 'room' || looksSettled) && (!LIT[s.name] || LIT[s.name].settled); }
 
   // Resolves with the element once it can be shown without a blank frame, or null if the slot has no usable media.
   function prime(s) {
@@ -820,7 +876,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     else if (instant) { var from = current; play(s); cssSet(s); if (from !== s) pause(from); }
     else go(s, name === 'base' ? 'rev' : 'fwd');
     if (withLooks) startLooks();
-    if (name === 'shoot') lightCandles(instant); else unlightCandles();
+    Object.keys(LIT).forEach(function (k) { if (k === name) lightLit(k, instant); else unlightLit(k); });
     if (name === 'base') heroPlay(true);
     else if (hero) heroPauseT = setTimeout(function () { if (current !== scenes.base) heroPlay(false); }, DUR + 150);   // keep it moving while it dissolves away
   }
@@ -886,7 +942,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 
   function bootGL() {
     if (gl || glDead) return;
-    if (!looksSettled || !heroSettled || !shootSettled || !order.every(function (s) { return s.ready && s.src; })) return;
+    if (!looksSettled || !heroSettled || !Object.keys(LIT).every(function (k) { return LIT[k].settled; }) || !order.every(function (s) { return s.ready && s.src; })) return;
     if (!webglOK()) { glDead = true; return; }
     var go3 = function () {
       if (gl || glDead) return;
@@ -979,6 +1035,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     'uniform sampler2D tFrom; uniform sampler2D tTo; uniform sampler2D tNoise;',
     'uniform float uAspFrom; uniform float uAspTo; uniform float uPlaneAsp; uniform vec2 uFocusFrom; uniform vec2 uFocusTo;',
     'uniform float uCndFrom; uniform float uCndTo; uniform float uAmb; uniform vec3 uC[5]; uniform float uL[5];',
+    'uniform float uStrFrom; uniform float uStrTo; uniform vec4 uSeg[2]; uniform vec3 uSeq[2];',
     'uniform float uP; uniform float uFade; uniform vec4 gFrom; uniform vec4 gTo; uniform float uSweep;',
     'uniform vec2 uSrc; uniform float uToBase;',
     'vec2 cover(vec2 uv, float ta, vec2 f) {',
@@ -998,6 +1055,27 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     '  }',
     '  return c * mix(0.42, 1.0, uAmb) * (1.0 - 0.92 * dark) + glow;',
     '}',
+    // LED strips: the photo starts drained of its red; each strip powers on along its length, then its light spreads out from it
+    'float segDist(vec2 p, vec2 a, vec2 b, float ta) {',
+    '  vec2 pa = (p - a) * vec2(ta, 1.0), ba = (b - a) * vec2(ta, 1.0);',
+    '  float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);',
+    '  return length(pa - ba * h);',
+    '}',
+    'vec3 strips(vec3 c, vec2 tuv, float ta) {',
+    '  float lit = 0.0, core = 0.0;',
+    '  for (int i = 0; i < 2; i++) {',
+    '    if (uSeq[i].x <= 0.0) continue;',
+    '    float d = segDist(tuv, uSeg[i].xy, mix(uSeg[i].xy, uSeg[i].zw, uSeq[i].x), ta);',
+    '    float k = exp(-d * d / 0.00012) * uSeq[i].z;',
+    '    float r = uSeq[i].y;',
+    '    float spread = (1.0 - smoothstep(r - 0.3, r, d)) * uSeq[i].z;',
+    '    core = max(core, k);',
+    '    lit = max(lit, max(k, spread));',
+    '  }',
+    '  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));',
+    '  vec3 off = vec3(l * 0.5) * vec3(0.92, 0.94, 1.0);',
+    '  return mix(off, c, clamp(lit, 0.0, 1.0)) + vec3(1.0, 0.12, 0.06) * core * 0.35;',
+    '}',
     'vec3 grade(vec3 c, vec4 g) {',
     '  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));',
     '  c = mix(vec3(l), c, g.x);',
@@ -1014,7 +1092,9 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     '    vec2 ta0 = cover(uv, uAspFrom, uFocusFrom), tb0 = cover(uv, uAspTo, uFocusTo);',
     '    vec3 a0 = grade(texture2D(tFrom, ta0).rgb, gFrom), b0 = grade(texture2D(tTo, tb0).rgb, gTo);',
     '    if (uCndFrom > 0.5) a0 = candles(a0, ta0, uAspFrom);',
+    '    if (uStrFrom > 0.5) a0 = strips(a0, ta0, uAspFrom);',
     '    if (uCndTo > 0.5) b0 = candles(b0, tb0, uAspTo);',
+    '    if (uStrTo > 0.5) b0 = strips(b0, tb0, uAspTo);',
     '    col = mix(a0, b0, uP);',
     '  } else {',
     // the change blooms out from the light source; going back to the plain room it closes in from the edges
@@ -1027,7 +1107,9 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     '    vec3 a = grade(texture2D(tFrom, ta1).rgb, gFrom);',
     '    vec3 b = grade(texture2D(tTo, tb1).rgb, gTo);',
     '    if (uCndFrom > 0.5) a = candles(a, ta1, uAspFrom);',
+    '    if (uStrFrom > 0.5) a = strips(a, ta1, uAspFrom);',
     '    if (uCndTo > 0.5) b = candles(b, tb1, uAspTo);',
+    '    if (uStrTo > 0.5) b = strips(b, tb1, uAspTo);',
     '    col = mix(a, b, t);',
     '    float band = t * (1.0 - t) * 4.0;',
     '    col += vec3(1.0, 0.74, 0.46) * band * band * mix(0.24, 0.07, uToBase);',
@@ -1082,7 +1164,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     order.forEach(texOf);   // upload every texture before the canvas is ever shown
     looks.forEach(texOf);
     if (hero && hero.ready) texOf(hero);
-    if (shootScene) texOf(shootScene);
+    Object.keys(LIT).forEach(function (k) { if (LIT[k].scene) texOf(LIT[k].scene); });
     function focusOf(s) { var f = s.focus || [0.5, 0.45]; return new T.Vector2(f[0], 1 - f[1]); }
 
     var u = {
@@ -1090,6 +1172,9 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       uAspFrom: { value: 1 }, uAspTo: { value: 1 }, uPlaneAsp: { value: 1 }, uFocusFrom: { value: new T.Vector2(0.5, 0.55) }, uFocusTo: { value: new T.Vector2(0.5, 0.55) },
       uCndFrom: { value: 0 }, uCndTo: { value: 0 }, uAmb: { value: 1 }, uL: { value: [0, 0, 0, 0, 0] },
       uC: { value: CANDLES.map(function (c) { return new T.Vector3(c.x, c.y, 1); }) },
+      uStrFrom: { value: 0 }, uStrTo: { value: 0 },
+      uSeg: { value: STRIPS.map(function (st) { return new T.Vector4(st.a[0], st.a[1], st.b[0], st.b[1]); }) },
+      uSeq: { value: STRIPS.map(function () { return new T.Vector3(0, 0, 0); }) },
       uP: { value: 0 }, uFade: { value: 0 }, gFrom: { value: new T.Vector4() }, gTo: { value: new T.Vector4() }, uSweep: { value: -1 },
       uSrc: { value: new T.Vector2(0.5, 0.86) }, uToBase: { value: 0 }
     };
@@ -1098,9 +1183,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
 
     var cur = glScene(current.name), gtx = null, baseW = 1, baseH = 1;
     var litT0 = cur.candles ? -1e9 : null;   // when the candles started lighting; null while the shoot isn't on screen
+    var stripT0 = cur.strips ? -1e9 : null;  // same for the red strips in Styling
     function bind(a, b) {
-      u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a); u.uFocusFrom.value = focusOf(a); u.uCndFrom.value = a.candles ? 1 : 0;
-      u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b); u.uFocusTo.value = focusOf(b); u.uCndTo.value = b.candles ? 1 : 0;
+      u.tFrom.value = texOf(a); u.uAspFrom.value = aspOf(a); u.gFrom.value = gradeOf(a); u.uFocusFrom.value = focusOf(a); u.uCndFrom.value = a.candles ? 1 : 0; u.uStrFrom.value = a.strips ? 1 : 0;
+      u.tTo.value = texOf(b); u.uAspTo.value = aspOf(b); u.gTo.value = gradeOf(b); u.uFocusTo.value = focusOf(b); u.uCndTo.value = b.candles ? 1 : 0; u.uStrTo.value = b.strips ? 1 : 0;
     }
     bind(cur, cur);
     view.refresh = function () { if (!gtx) bind(cur, cur); };   // e.g. the phone video's first frame replacing its poster
@@ -1110,6 +1196,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       gtx = null; cur = keep;
       bind(cur, cur); u.uP.value = 0;
       if (!cur.candles) litT0 = null;
+      if (!cur.strips) stripT0 = null;
       if (drop !== cur) pause(drop);
     }
     function go3(s, instant) {
@@ -1126,7 +1213,8 @@ h1 .w-the{font-style:italic;margin-right:.04em}
       }
       if (s === cur) return;
       if (s.candles) litT0 = instant || reduceMQ.matches ? -1e9 : performance.now();
-      if (instant) { var was = cur; cur = s; bind(s, s); u.uP.value = 0; if (was !== s) pause(was); if (!s.candles) litT0 = null; return; }
+      if (s.strips) stripT0 = instant || reduceMQ.matches ? -1e9 : performance.now();
+      if (instant) { var was = cur; cur = s; bind(s, s); u.uP.value = 0; if (was !== s) pause(was); if (!s.candles) litT0 = null; if (!s.strips) stripT0 = null; return; }
       var reduced = reduceMQ.matches;
       gtx = { from: cur, to: s, p0: 0, target: 1, t0: performance.now(), full: reduced ? REDUCED_FADE : DUR };
       gtx.dur = gtx.full;
@@ -1205,6 +1293,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
         var lv = candleLevels(now - litT0, now / 1000, reduced);
         for (var ci = 0; ci < lv.L.length; ci++) u.uL.value[ci] = lv.L[ci];
         u.uAmb.value = lv.amb;
+      }
+      if (stripT0 !== null) {
+        var sl = stripLevels(now - stripT0, reduced);
+        for (var si = 0; si < sl.length; si++) u.uSeq.value[si].set(sl[si][0], sl[si][1], sl[si][2]);
       }
       renderer.render(scene, camera);
       view.frames = (view.frames || 0) + 1;
