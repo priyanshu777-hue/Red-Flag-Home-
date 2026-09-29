@@ -332,7 +332,7 @@ h1 .w-the{font-style:italic;margin-right:.04em}
   .js .media img,.js .media video{transition:none}
 }
 
-/* picked state: the Reset button sits inside the collapsed capsule instead of in its old column */
+/* picked state: the Back button sits inside the collapsed capsule instead of in its old column */
 .stage.picked .cell.on{position:absolute;inset:0;margin:auto;width:200px;border:0;
   transition:opacity 420ms var(--ease),filter 420ms var(--ease)}
 @media (max-width:700px){.stage.picked .cell.on{width:196px;height:60px}}
@@ -1459,10 +1459,10 @@ h1 .w-the{font-style:italic;margin-right:.04em}
     buttons.forEach(function (b) {
       var on = b === btn;
       b.classList.toggle('on', on);
-      if (on) { b.textContent = 'Reset'; b.disabled = false; b.classList.remove('pending'); }
+      if (on) { b.textContent = 'Back'; b.disabled = false; b.classList.remove('pending'); }
       else { b.disabled = true; b.setAttribute('aria-hidden', 'true'); b.tabIndex = -1; }
     });
-    live.textContent = btn.getAttribute('data-label') + ' shown. Reset to go back.';
+    live.textContent = btn.getAttribute('data-label') + ' shown. Press Back to return.';
     store(scene);
     if (!restoring) { try { btn.focus({ preventScroll: true }); } catch (e) {} }
   }
