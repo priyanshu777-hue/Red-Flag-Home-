@@ -1,0 +1,10 @@
+{
+  "task_id": "ab9b75f0-8a3e-41c7-8617-e0bf8a16fa6d",
+  "task_name": "red-flag-ritual",
+  "skill": "ppt-design-skill",
+  "skill_version": "1.5",
+  "template_source": "skill/templates/task-init",
+  "project_root": "/home/user/Red-Flag-Home-",
+  "task_root": "/home/user/Red-Flag-Home-/ppt_tasks/red-flag-ritual",
+  "created_at": "2026-10-02T09:49:19.697864+00:00"
+}
